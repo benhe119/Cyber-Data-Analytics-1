@@ -3,11 +3,13 @@
 |    Credit Card Fraud                |
 |    4 May 2018                       |
 +-------------------------------------+
-'''
 
 '''
-    1   import packages (make sure to use virtualenv workon CDA for correct packages)
-'''
+
+#################################################################################
+## 1 Import packages (make sure to use virtualenv workon CDA for correct packages)
+#################################################################################
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -23,23 +25,21 @@ from sklearn.ensemble import RandomForestClassifier
 import seaborn as sns
 
 # cross_validation will soon be deprecated, rather use model_selection
-from sklearn import cross_validation
+#from sklearn import cross_validation
 from sklearn import model_selection
 
 import numpy as np
-
-#from imblearn.over_sampling import OverSampler
 
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 #from imblearn.unbalanced_dataset import UnbalancedDataset
 
-'''
-    2   Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
-'''
+####################################################################
+## 2 Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
+####################################################################
 
-df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knime_50times_features.csv')  # knimepreprocessedfeatures
+df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knimepreprocessedfeatures.csv')  # knimepreprocessedfeatures knime_40times_features
 
 print '\nCREDIT CARD FRAUD - ASSIGNMENT 1'
 
@@ -67,33 +67,23 @@ df_sort_creation = df.sort_values(by = 'creationdate', ascending = True)#Returns
 key = lambda k:(k.year,k.month,k.day)
 #print df_sort_creation.groupby(df_sort_creation['creationdate'].apply(key)).mean()['amount']
 
-'''
-    3   Dealing with missing data and rename the columns
-'''
+####################################################################
+## 3   Dealing with missing data and rename the columns
+####################################################################
 
 def num_missing(x):
     return sum(x.isnull())
 
-''' change names of columns to more human readable ones'''
+###### change names of columns to more human readable ones
 df_renamed = df.rename(index=str, columns = {'txvariantcode': 'cardtype', 'bin': 'issuer_id', 'shopperinteraction': 'shoppingtype',
                    'simple_journal': 'label', 'cardverificationcodesupplied': 'cvcsupply',
                   'cvcresponsecode': 'cvcresponse', 'accountcode': 'merchant_id', 'MOD' : 'mod_hundreds', 'DIFF' : 'cmp_cntry_issuer', 'EURO' : 'amount_euro'})
 
-''' select which columns we want in the final dataset'''
+###### select which columns we want in the final dataset
 df_select = (df_renamed[['label', 'cmp_cntry_issuer', 'bookingdate', 'merchant_id', 'issuer_id',
               'issuercountrycode', 'amount', 'mod_hundreds', 'amount_euro', 'currencycode', 'shoppingtype',
               'creationdate', 'cardtype', 'card_id','cvcsupply','cvcresponse','mail_id','ip_id','shoppercountrycode']])
 
-# data shape, datatypes, description
-
-# print '\nData Statistics: for manipulated/selected fields of dataset'
-# print '\nData Shape:'
-# print df_select.shape
-# print '\nIndex Types:\n----------------------------------------------'
-# print df_select.dtypes
-# print '\nData Statistics:\n----------------------------------------------------------------------------------'
-# print df_select.describe()
-#
 print "\nMissing values per column:"
 print df_select.apply(num_missing, axis=0)
 print "\nMissing values per row:"
@@ -116,7 +106,7 @@ print df_select.apply(num_missing, axis=0)
 # print '\nData Statistics:\n------------------------------------------------------------------------------'
 # print df_clean.describe()
 
-# Assign Categories
+############# Assign Categories ###############
 
 # categories -> var taking on limited, (usually) fixed number of possible values
 
@@ -144,7 +134,7 @@ mail_id_category = pd.Categorical(df_clean['mail_id'])
 ip_id_category = pd.Categorical(df_clean['ip_id'])
 shoppercountrycode_category = pd.Categorical(df_clean['shoppercountrycode'])
 
-# Create Dictionaries
+################# Create Dictionaries ###################
 
 merchant_id_dict = dict(set(zip(merchant_id_category, merchant_id_category.codes)))
 issuer_id_dict = dict(set(zip(issuer_id_category, issuer_id_category.codes)))
@@ -161,7 +151,7 @@ mail_id_dict = dict(set(zip(mail_id_category, mail_id_category.codes)))
 ip_id_dict = dict(set(zip(ip_id_category, ip_id_category.codes)))
 shoppercountrycode_dict = dict(set(zip(shoppercountrycode_category, shoppercountrycode_category.codes)))
 
-# Assign codes to Data Frame
+################### Assign codes to Data Frame ######################
 
 df_clean['issuercountrycode'] = issuercountrycode_category.codes
 df_clean['cardtype'] = cardtype_category.codes
@@ -188,9 +178,12 @@ print df1.shape
 print '\nIndex Types:\n-------------------------------------------'
 print df1.dtypes
 print '\n-----------------------------------\n'
+# print '\nData Statistics:\n------------------------------------------------------------------------------'
+# print df1.describe()
 
-
-#part 6
+####################################################################
+## 6
+####################################################################
 
 
 df_input = (df1[['issuercountrycode', 'cardtype', 'issuer_id', 'currencycode',
@@ -213,7 +206,9 @@ y = df_input[df_input.columns[-1]].as_matrix()
 print '\n'
 
 
-#    7   Train dataset
+####################################################################
+## 7   Training Dataset
+####################################################################
 
 TP, FP, FN, TN = 0, 0, 0, 0
 x_array = np.array(x)
@@ -228,18 +223,16 @@ print y.size
 print '\n'
 print np.mean(y)
 
-'''
-#x_array = preprocessing.normalize(np.array(x), norm='l2')
-enc = preprocessing.OneHotEncoder()
-#enc = preprocessing.LabelEncoder()
-enc.fit(x_array[:,0:-1])
-x_encode = enc.transform(x_array[:,0:-1]).toarray()
-min_max_scaler = preprocessing.MinMaxScaler()
-
-x_array[:,0:-1] = min_max_scaler.fit_transform(x_array[:,0:-1])
-x_in = np.c_[x_encode,x_array[:,-1]]
-y_in = np.array(y)
-'''
+# #x_array = preprocessing.normalize(np.array(x), norm='l2')
+# enc = preprocessing.OneHotEncoder()
+# #enc = preprocessing.LabelEncoder()
+# enc.fit(x_array[:,0:-1])
+# x_encode = enc.transform(x_array[:,0:-1]).toarray()
+# min_max_scaler = preprocessing.MinMaxScaler()
+#
+# x_array[:,0:-1] = min_max_scaler.fit_transform(x_array[:,0:-1])
+# x_in = np.c_[x_encode,x_array[:,-1]]
+# y_in = np.array(y)
 
 min_max_scaler = preprocessing.MinMaxScaler()
 
@@ -285,7 +278,7 @@ print x_in.size
 print 'y_in size: '
 print y_in.size
 
-print '\n Splitting training and testing data:\n'
+print '\nSplitting training and testing data:\n'
 x_train, x_test, y_train, y_test = model_selection.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
 
 print 'x_train size: '
@@ -297,7 +290,7 @@ print y_train.shape
 print 'y_test size: '
 print y_test.shape
 
-print '\n ratios of split data - checked data is split in the same true/false ratio for test and train'
+print '\nRatios of split data - checked data is split in the same true/false ratio for test and train'
 print 'sum y train'
 print np.sum(y_train)
 print 'sum y test'
@@ -341,17 +334,17 @@ clf = LogisticRegression()
 
 for cutoff in np.arange(0.1, 0.9, 0.1):
     clf = LogisticRegression()
-    validated = cross_validation.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
+    validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
     scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
     print cutoff
 
 
-
+plt.figure(1)
 sns.boxplot(np.arange(0.1, 0.9, 0.1), scores)
 plt.title('F scores for each cutoff setting')
 plt.xlabel('each cutoff value')
 plt.ylabel('custom score')
-plt.show()
+#plt.show()
 
 
 # http://scikit-learn.org/stable/modules/svm.html
@@ -360,15 +353,16 @@ plt.show()
 '''
 part 9
 '''
-cutoff = 0.6
+cutoff = 0.5 # 0.6
 
 #clf = LogisticRegression()
 #clf = svm.SVC(kernel='poly', degree=3)
 print 'create clf'
-clf = svm.SVC(probability=True)
+#clf = svm.SVC(probability=True)
 
-#clf = RandomForestClassifier(n_estimators=50, criterion='gini')
+clf = RandomForestClassifier(n_estimators=50, criterion='gini')
 #clf = svm.SVC(kernel='sigmoid')
+
 print 'fit clf'
 clf.fit(sampled_X, sampled_Y)
 #y_predict = clf.predict(x_test)#output label
@@ -382,6 +376,7 @@ false_positive_rate, true_positive_rate, thresholds1 = roc_curve(y_test, predict
 print 'roc_auc'
 roc_auc = auc(false_positive_rate, true_positive_rate)
 
+plt.figure(2)
 plt.subplot(1, 2, 1)
 plt.plot(false_positive_rate, true_positive_rate, 'b', label = 'AUC = %0.2f'% roc_auc)
 plt.xlabel('False Positive Rate')
