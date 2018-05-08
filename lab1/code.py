@@ -18,9 +18,9 @@ from imblearn import over_sampling
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.over_sampling import SMOTE
 from imblearn import under_sampling
-from imblearn.under_sampling import RandomUnderSampler 
+from imblearn.under_sampling import RandomUnderSampler
 
-df = pd.read_csv('./data_for_student_case.csv')
+df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knime_10times_features.csv')
 print '\nshape of data'
 print df.shape
 print '\ntypes of index'
@@ -52,7 +52,7 @@ def num_missing(x):
     return sum(x.isnull())
 
 df_renamed = df.rename(index=str, columns = {'txvariantcode': 'cardtype', 'bin': 'issuer_id', 'shopperinteraction': 'shoppingtype',
-                   'simple_journal': 'label', 'cardverificationcodesupplied': 'cvcsupply', 
+                   'simple_journal': 'label', 'cardverificationcodesupplied': 'cvcsupply',
                   'cvcresponsecode': 'cvcresponse', 'accountcode': 'merchant_id'})
 df_select = (df_renamed[['issuercountrycode', 'cardtype', 'issuer_id', 'euro', 'currencycode',
               'shoppercountrycode', 'shoppingtype', 'label', 'cvcsupply', 'cvcresponse', 'merchant_id',
@@ -131,21 +131,28 @@ enc.fit(x_array[:,0:-1])
 x_encode = enc.transform(x_array[:,0:-1]).toarray()
 min_max_scaler = preprocessing.MinMaxScaler()
 a = x_array[:,-1]
+
 shape = a.shape
 a = np.reshape(a, (-1, 1))
+
 a = min_max_scaler.fit_transform(a)
+
 a = np.reshape(a, shape)
+
 print a.shape
 x_array[:,-1] = a
 x_in = np.c_[x_encode,x_array[:,-1]]
 y_in = np.array(y)
-x_train, x_test, y_train, y_test = cross_validation.train_test_split(x_in, y_in, test_size = 0.9)#test_size: proportion of train/test data
+
+print x_in.size
+print y_in.size
+
+x_train, x_test, y_train, y_test = cross_validation.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
 print "Training date set"
 #sampler = RandomUnderSampler()
 #sampler = RandomOverSampler()
 sampler = SMOTE(kind='regular')
 usx, usy = sampler.fit_sample(x_train, y_train)
-
 
 '''
 part 8
@@ -180,10 +187,10 @@ part 9
 '''
 cutoff = 0.6
 #clf = LogisticRegression()
-#clf = svm.SVC(kernel='poly', degree=3)  
+#clf = svm.SVC(kernel='poly', degree=3)
 clf = svm.SVC(probability=True)
 #clf = RandomForestClassifier(n_estimators=50, criterion='gini')
-#clf = svm.SVC(kernel='sigmoid')  
+#clf = svm.SVC(kernel='sigmoid')
 clf.fit(usx, usy)
 #y_predict = clf.predict(x_test)#output label
 predict_proba = clf.predict_proba(x_test)
