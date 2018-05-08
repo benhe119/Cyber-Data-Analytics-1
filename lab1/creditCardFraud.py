@@ -1,8 +1,8 @@
 '''
-+---------------------------------------------+
-|    Credit Card Fraud                        |
-|    4 May 2018                               |
-+---------------------------------------------+
++-------------------------------------+
+|    Credit Card Fraud                |
+|    4 May 2018                       |
++-------------------------------------+
 '''
 
 '''
@@ -24,10 +24,9 @@ import seaborn as sns
 
 # cross_validation will soon be deprecated, rather use model_selection
 from sklearn import cross_validation
-#from sklearn import model_selection
+from sklearn import model_selection
 
 import numpy as np
-
 
 #from imblearn.over_sampling import OverSampler
 
@@ -39,7 +38,8 @@ from imblearn.under_sampling import RandomUnderSampler
 '''
     2   Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
 '''
-df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knime_10times_features.csv')  # knimepreprocessedfeatures
+
+df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knime_50times_features.csv')  # knimepreprocessedfeatures
 
 print '\nCREDIT CARD FRAUD - ASSIGNMENT 1'
 
@@ -195,7 +195,7 @@ print '\n-----------------------------------\n'
 
 df_input = (df1[['issuercountrycode', 'cardtype', 'issuer_id', 'currencycode',
               'shoppercountrycode', 'shoppingtype', 'cvcsupply', 'cvcresponse_int', 'merchant_id', 'amount_euro',
-              'label_int']])
+              'mod_hundreds', 'label_int']])
 df_input[['issuer_id','label_int']] = df_input[['issuer_id','label_int']].astype(int)
 
 print '\nDataset Statistics: df_input'
@@ -285,20 +285,41 @@ print x_in.size
 print 'y_in size: '
 print y_in.size
 
-x_train, x_test, y_train, y_test = cross_validation.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
-print "\nTraining data set ..."
+print '\n Splitting training and testing data:\n'
+x_train, x_test, y_train, y_test = model_selection.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
+
+print 'x_train size: '
+print x_train.shape
+print 'x_test size: '
+print x_test.shape
+print '\n y_train size: '
+print y_train.shape
+print 'y_test size: '
+print y_test.shape
+
+print '\n ratios of split data - checked data is split in the same true/false ratio for test and train'
+print 'sum y train'
+print np.sum(y_train)
+print 'sum y test'
+print np.sum(y_test)
+
+print "\nApplying SMOTE oversampling to data set ..."
 #sampler = RandomUnderSampler()
 #sampler = RandomOverSampler()
-sampler = SMOTE(kind='regular')
-print 'before sampler'
-usx, usy = sampler.fit_sample(x_train, y_train)
-print 'after sampler'
-print '\n'
-print 'usx size'
-print usx.size
-print 'usy size'
-print usy.size
 
+
+print 'before SMOTE sampler'
+
+sampler = SMOTE(kind='regular')
+sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
+
+print 'after SMOTE sampler'
+print '\n'
+print 'sampled_X size'
+print sampled_X.size
+print 'sampled_Y size'
+print sampled_Y.size
+print '\n'
 '''
 part 8
 '''
@@ -315,10 +336,13 @@ def custom_score(cutoff):
     return score_cutoff
 
 print 'before cutoff loop'
+
+clf = LogisticRegression()
+
 for cutoff in np.arange(0.1, 0.9, 0.1):
     clf = LogisticRegression()
-    validated = cross_validation.cross_val_score(clf, usx , usy, cv = 10, scoring = custom_score(cutoff))
-    scores.append(validated) # possible pre-allocation needed?
+    validated = cross_validation.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
+    scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
     print cutoff
 
 
@@ -346,7 +370,7 @@ clf = svm.SVC(probability=True)
 #clf = RandomForestClassifier(n_estimators=50, criterion='gini')
 #clf = svm.SVC(kernel='sigmoid')
 print 'fit clf'
-clf.fit(usx, usy)
+clf.fit(sampled_X, sampled_Y)
 #y_predict = clf.predict(x_test)#output label
 
 print 'clf.predict_proba'
