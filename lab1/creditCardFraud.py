@@ -11,6 +11,7 @@
 #################################################################################
 
 import pandas as pd
+
 import matplotlib.pyplot as plt
 
 from sklearn import neighbors
@@ -18,15 +19,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn import preprocessing
+from sklearn import model_selection
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, f1_score, precision_score
 from sklearn.ensemble import RandomForestClassifier
-import seaborn as sns
 
-# cross_validation will soon be deprecated, rather use model_selection
-#from sklearn import cross_validation
-from sklearn import model_selection
+import seaborn as sns
 
 import numpy as np
 
@@ -48,10 +47,10 @@ print '\nSee google drive document for field descriptions'
 
 # import feature set (from KNIME) CSV file using pandas
 
-print "\n Raw data shape from KNIME:"
+print "\n Raw data shape from KNIME dataset file:"
 print df.shape
 
-'''DONE IN KNIME'''
+## COMMENTED BELOW DONE IN KNIME:
 # convert string to datetime
 # df['bookingdate'] = pd.to_datetime(df['bookingdate'])
 # df['creationdate'] = pd.to_datetime(df['creationdate'])
@@ -63,7 +62,7 @@ print df.shape
 #key = lambda k:k.day
 #print df.groupby(df['bookingdate'].apply(key))
 
-df_sort_creation = df.sort_values(by = 'creationdate', ascending = True)#Returns a new dataframe, leaving the original dataframe unchanged
+df_sort_creation = df.sort_values(by = 'creationdate', ascending = True) #Returns a new dataframe, leaving the original dataframe unchanged
 key = lambda k:(k.year,k.month,k.day)
 #print df_sort_creation.groupby(df_sort_creation['creationdate'].apply(key)).mean()['amount']
 
@@ -188,7 +187,7 @@ print '\n-----------------------------------\n'
 
 df_input = (df1[['issuercountrycode', 'cardtype', 'issuer_id', 'currencycode',
               'shoppercountrycode', 'shoppingtype', 'cvcsupply', 'cvcresponse_int', 'merchant_id', 'amount_euro',
-              'mod_hundreds', 'label_int']])
+               'label_int']]) # 'mod_hundreds',
 df_input[['issuer_id','label_int']] = df_input[['issuer_id','label_int']].astype(int)
 
 print '\nDataset Statistics: df_input'
@@ -204,6 +203,16 @@ y = df_input[df_input.columns[-1]].as_matrix()
 # print '\nx ():\n---------------------------------------------'
 # print x
 print '\n'
+
+# Covariance matrix
+
+covMat = df_input.cov()
+print '\n Covariance Matrix of df_input'
+print covMat
+print '\n Writing cov matrix to csv file'
+covMat.to_csv(path_or_buf='/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/covmat.csv')
+print 'csv file created'
+
 
 
 ####################################################################
@@ -353,15 +362,16 @@ plt.ylabel('custom score')
 '''
 part 9
 '''
-cutoff = 0.5 # 0.6
+cutoff = 0.6 # 0.6
+
+print 'create clf'
 
 #clf = LogisticRegression()
-#clf = svm.SVC(kernel='poly', degree=3)
-print 'create clf'
-#clf = svm.SVC(probability=True)
+clf = svm.SVC(kernel='poly', degree=3)
+clf = svm.SVC(probability=True)
 
-clf = RandomForestClassifier(n_estimators=50, criterion='gini')
-#clf = svm.SVC(kernel='sigmoid')
+# clf = RandomForestClassifier(n_estimators=50, criterion='gini')
+clf = svm.SVC(kernel='sigmoid')
 
 print 'fit clf'
 clf.fit(sampled_X, sampled_Y)
@@ -377,20 +387,22 @@ print 'roc_auc'
 roc_auc = auc(false_positive_rate, true_positive_rate)
 
 plt.figure(2)
+
 plt.subplot(1, 2, 1)
 plt.plot(false_positive_rate, true_positive_rate, 'b', label = 'AUC = %0.2f'% roc_auc)
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
-#plt.legend('AUC = %0.2f'% roc_auc)
 plt.legend(loc="lower right")
 precision, recall, thresholds2 = precision_recall_curve(y_test, predict_proba[:,1])
+
 plt.subplot(1, 2, 2)
 plt.plot(recall, precision)
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.title('PR Curve')
 plt.show()
+
 for i in xrange(len(y_predict)):
     if y_test[i]==1 and y_predict[i]==1:
         TP += 1
@@ -400,10 +412,31 @@ for i in xrange(len(y_predict)):
         FN += 1
     if y_test[i]==0 and y_predict[i]==0:
         TN += 1
+
 print 'TP: '+ str(TP)
 print 'FP: '+ str(FP)
 print 'FN: '+ str(FN)
 print 'TN: '+ str(TN)
+
+###############################################################################
+## END
+###############################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
