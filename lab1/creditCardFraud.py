@@ -38,7 +38,7 @@ from imblearn.under_sampling import RandomUnderSampler
 ## 2 Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
 ####################################################################
 
-df = pd.read_csv('/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/knimepreprocessedfeatures.csv')  # knimepreprocessedfeatures knime_40times_features
+df = pd.read_csv('./knimepreprocessedfeatures.csv')  # knimepreprocessedfeatures knime_40times_features
 
 print '\nCREDIT CARD FRAUD - ASSIGNMENT 1'
 
@@ -210,7 +210,7 @@ covMat = df_input.cov()
 print '\n Covariance Matrix of df_input'
 print covMat
 print '\n Writing cov matrix to csv file'
-covMat.to_csv(path_or_buf='/home/lx/Documents/Coursework/Q4/CyberDataAnalytics/Assignment1/Code/covmat.csv')
+covMat.to_csv(path_or_buf='./covmat.csv')
 print 'csv file created'
 
 
@@ -328,7 +328,7 @@ part 8
 
 def cutoff_predict(clf, x, cutoff):
     return (clf.predict_proba(x)[:,1]>cutoff).astype(int)
-scores = []
+
 
 def custom_score(cutoff):
     def score_cutoff(clf, x, y):
@@ -340,9 +340,12 @@ def custom_score(cutoff):
 print 'before cutoff loop'
 
 clf = LogisticRegression()
+clf = RandomForestClassifier(n_estimators=50, criterion='gini')
+
+scores = []
 
 for cutoff in np.arange(0.1, 0.9, 0.1):
-    clf = LogisticRegression()
+    # clf = LogisticRegression()
     validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
     scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
     print cutoff
@@ -367,11 +370,12 @@ cutoff = 0.6 # 0.6
 print 'create clf'
 
 #clf = LogisticRegression()
-clf = svm.SVC(kernel='poly', degree=3)
-clf = svm.SVC(probability=True)
 
-# clf = RandomForestClassifier(n_estimators=50, criterion='gini')
-clf = svm.SVC(kernel='sigmoid')
+clf = RandomForestClassifier(n_estimators=50, criterion='gini')
+
+# clf = svm.SVC(kernel='poly', degree=3)
+# clf = svm.SVC(probability=True)
+# clf = svm.SVC(kernel='sigmoid')
 
 print 'fit clf'
 clf.fit(sampled_X, sampled_Y)
