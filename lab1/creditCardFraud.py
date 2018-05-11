@@ -3,7 +3,6 @@
 |    Credit Card Fraud                |
 |    4 May 2018                       |
 +-------------------------------------+
-
 '''
 
 #################################################################################
@@ -15,15 +14,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn import neighbors
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression     # Logistical Regression
+from sklearn.ensemble import RandomForestClassifier     # Random Forest
+from sklearn.neighbors import KNeighborsClassifier      # KNN
+from sklearn.naive_bayes import GaussianNB              # Naive Bayes
 from sklearn import svm
 from sklearn import preprocessing
 from sklearn import model_selection
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc, precision_recall_curve, f1_score, precision_score
-from sklearn.ensemble import RandomForestClassifier
 
 import seaborn as sns
 
@@ -47,7 +47,7 @@ print '\nSee google drive document for field descriptions'
 
 # import feature set (from KNIME) CSV file using pandas
 
-print "\n Raw data shape from KNIME dataset file:"
+print "\nRaw data shape from KNIME dataset file: knimepreprocessedfeatures.csv"
 print df.shape
 
 ## COMMENTED BELOW DONE IN KNIME:
@@ -84,17 +84,18 @@ df_select = (df_renamed[['label', 'cmp_cntry_issuer', 'bookingdate', 'merchant_i
               'creationdate', 'cardtype', 'card_id','cvcsupply','cvcresponse','mail_id','ip_id','shoppercountrycode']])
 
 print "\nMissing values per column:"
-print df_select.apply(num_missing, axis=0)
+print "  not shown"
+# print df_select.apply(num_missing, axis=0)
 print "\nMissing values per row:"
+print "  not shown"
 # # axis = 0 -> rows (aka indexes), axis = 1 -> cols
-print df_select.apply(num_missing, axis=1).head(n=5) # why this command only on head?
-
-''' create final dataset - without N/A values '''
+# print df_select.apply(num_missing, axis=1).head(n=5) # why this command only on head?
 
 df_clean = df_select.dropna(axis=0)
 # df_clean = df_select.fillna('missing')
 print "\nMissing values per column:"
-print df_select.apply(num_missing, axis=0)
+print "  not shown"
+# print df_select.apply(num_missing, axis=0)
 
 
 # print '\nDataset Statistics: for manipulated/cleaned/selected fields of dataset'
@@ -133,7 +134,7 @@ mail_id_category = pd.Categorical(df_clean['mail_id'])
 ip_id_category = pd.Categorical(df_clean['ip_id'])
 shoppercountrycode_category = pd.Categorical(df_clean['shoppercountrycode'])
 
-################# Create Dictionaries ###################
+#################            Create Dictionaries             ###################
 
 merchant_id_dict = dict(set(zip(merchant_id_category, merchant_id_category.codes)))
 issuer_id_dict = dict(set(zip(issuer_id_category, issuer_id_category.codes)))
@@ -150,7 +151,7 @@ mail_id_dict = dict(set(zip(mail_id_category, mail_id_category.codes)))
 ip_id_dict = dict(set(zip(ip_id_category, ip_id_category.codes)))
 shoppercountrycode_dict = dict(set(zip(shoppercountrycode_category, shoppercountrycode_category.codes)))
 
-################### Assign codes to Data Frame ######################
+###################        Assign codes to Data Frame     ######################
 
 df_clean['issuercountrycode'] = issuercountrycode_category.codes
 df_clean['cardtype'] = cardtype_category.codes
@@ -171,66 +172,57 @@ df1 = df_clean.ix[(df_clean['label_int']==1) | (df_clean['label_int']==0)]#23703
 
 # Describe df1 dataset
 
-print '\nDataset Statistics: df1'
-print '\nData Shape:'
-print df1.shape
-print '\nIndex Types:\n-------------------------------------------'
-print df1.dtypes
-print '\n-----------------------------------\n'
+# print '\nDataset Statistics: df1'
+# print '\nData Shape:'
+# print df1.shape
+# print '\nIndex Types:\n-------------------------------------------'
+# print df1.dtypes
+# print '\n-----------------------------------\n'
+
 # print '\nData Statistics:\n------------------------------------------------------------------------------'
 # print df1.describe()
-
-####################################################################
-## 6
-####################################################################
-
 
 df_input = (df1[['issuercountrycode', 'cardtype', 'issuer_id', 'currencycode',
               'shoppercountrycode', 'shoppingtype', 'cvcsupply', 'cvcresponse_int', 'merchant_id', 'amount_euro',
                'label_int']]) # 'mod_hundreds',
 df_input[['issuer_id','label_int']] = df_input[['issuer_id','label_int']].astype(int)
 
-print '\nDataset Statistics: df_input'
-print '\nData Shape:'
-print df_input.shape
-print '\nIndex Types:\n-------------------------------------------'
-print df_input.dtypes
-print '\n-----------------------------------\n'
+# print '\nDataset Statistics: df_input'
+# print '\nData Shape:'
+# print df_input.shape
+# print '\nIndex Types:\n-------------------------------------------'
+# print df_input.dtypes
+# print '\n-----------------------------------\n'
 
 x = df_input[df_input.columns[0:-1]].as_matrix()
 y = df_input[df_input.columns[-1]].as_matrix()
 
-# print '\nx ():\n---------------------------------------------'
-# print x
-print '\n'
+# print '\n'
 
-# Covariance matrix
+# Covariance matrix to CSV file
 
-covMat = df_input.cov()
-print '\n Covariance Matrix of df_input'
-print covMat
-print '\n Writing cov matrix to csv file'
-covMat.to_csv(path_or_buf='./covmat.csv')
-print 'csv file created'
-
-
+# covMat = df_input.cov()
+# print '\nCovariance Matrix of df_input'
+# #print covMat
+# print '\nWriting cov matrix to csv file'
+# covMat.to_csv(path_or_buf='./covmat.csv')
+# print 'csv file created\n'
 
 ####################################################################
-## 7   Training Dataset
+##    Training Dataset
 ####################################################################
 
-TP, FP, FN, TN = 0, 0, 0, 0
 x_array = np.array(x)
 
-print 'x.shape: '
-print x.shape
-print 'x_array.size: '
-print x_array.size
-print '------'
-print 'y.shape: '
-print y.size
-print '\n'
-print np.mean(y)
+# print 'x.shape: '
+# print x.shape
+# print 'x_array.size: '
+# print x_array.size
+# print '------'
+# print 'y.shape: '
+# print y.size
+# print '\n'
+# print np.mean(y)
 
 # #x_array = preprocessing.normalize(np.array(x), norm='l2')
 # enc = preprocessing.OneHotEncoder()
@@ -249,12 +241,12 @@ X_new = min_max_scaler.fit_transform(x)
 
 x_array = np.reshape(X_new,x.shape)
 
-print 'X new size: '
-print X_new.size
-print '\n'
-print 'x_array size: '
-print x_array.shape
-print '\n'
+# print 'X new size: '
+# print X_new.size
+# print '\n'
+# print 'x_array size: '
+# print x_array.shape
+# print '\n'
 
 # need x_in (9781x10)
 #      y_in (9781x1)
@@ -282,53 +274,96 @@ print '\n'
 x_in = x_array;
 y_in = y;
 
-print 'x_in size: '
-print x_in.size
-print 'y_in size: '
-print y_in.size
+# print 'x_in size: '
+# print x_in.size
+# print 'y_in size: '
+# print y_in.size
 
-print '\nSplitting training and testing data:\n'
+print '\nSplitting Training and Testing data ...'
 x_train, x_test, y_train, y_test = model_selection.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
+print '  Done\n'
 
-print 'x_train size: '
-print x_train.shape
-print 'x_test size: '
-print x_test.shape
-print '\n y_train size: '
-print y_train.shape
-print 'y_test size: '
-print y_test.shape
+# print '\n y_train size: '
+# print y_train.shape
+# print 'y_test size: '
+# print y_test.shape
 
-print '\nRatios of split data - checked data is split in the same true/false ratio for test and train'
-print 'sum y train'
-print np.sum(y_train)
-print 'sum y test'
-print np.sum(y_test)
+print '\nRatios of split data (before sampling)'
+print '  Train data size: ' + str(x_train.shape)
+print '  Test data size: ' + str(x_test.shape)
+print '  Fraud count: training data  = ' + str(np.sum(y_train)) + '; testing data = ' + str(np.sum(y_test))
 
-print "\nApplying SMOTE oversampling to data set ..."
-#sampler = RandomUnderSampler()
-#sampler = RandomOverSampler()
+print "\nSampling data set ..."
 
+# sampler = SMOTE(kind='regular')
+# print '  SMOTE Oversampling'
 
-print 'before SMOTE sampler'
+# sampler = RandomUnderSampler()
+# print '  Undersampling'
 
-sampler = SMOTE(kind='regular')
+sampler = RandomOverSampler()
+print '  Oversampling'
+
+print '  Sampling data ...'
 sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
+print '  Done\n'
 
-print 'after SMOTE sampler'
-print '\n'
-print 'sampled_X size'
-print sampled_X.size
-print 'sampled_Y size'
-print sampled_Y.size
-print '\n'
-'''
-part 8
-'''
+# print 'After sampler\n'
+# print 'sampled_X size'
+# print sampled_X.size
+# print 'sampled_Y size'
+# print sampled_Y.size
+# print '\n'
+
+print 'Sampled Data'
+print '  Train data size: ' + str(sampled_X.shape)
+print '  Fraud count: training data = ' + str(np.sum(sampled_Y.shape))
+print '  * Remember: sampling not done on test data'
+
+################################################################################
+###########              DEFINE CLASSIFIER                      ################
+################################################################################
+
+# http://scikit-learn.org/stable/modules/svm.html
+# http://scikit-learn.org/stable/modules/naive_bayes.html
+
+print '\nCreating classifier object "clf"'
+print '  Classifier used:'
+
+########## Logistical Regression ##############
+
+# clf = LogisticRegression()
+# print '  Logistical Regression'
+
+########## Random Forest Classifier ###########
+
+# clf = RandomForestClassifier(n_estimators=5, criterion='gini')
+# print '  Random Forest Classifier'
+
+########## Naive Bayes ########################
+
+clf = GaussianNB()
+print '  Gaussian Naive Bayes'
+
+################################################################################
+
+# List of ML algorithms not to be used on LARGE datasets
+
+# clf = svm.SVC(kernel='poly', degree=3)
+# clf = svm.SVC(probability=True)
+# clf = svm.SVC(kernel='sigmoid')
+
+# clf = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='auto', leaf_size=5, p=2,metric='minkowski',n_jobs=1)
+# print ' K Nearest Neighbours'
+
+################################################################################
+##############              CROSS VALIDATION             #######################
+################################################################################
+
+cutoff = 0.6 # redundant?
 
 def cutoff_predict(clf, x, cutoff):
     return (clf.predict_proba(x)[:,1]>cutoff).astype(int)
-
 
 def custom_score(cutoff):
     def score_cutoff(clf, x, y):
@@ -337,57 +372,40 @@ def custom_score(cutoff):
         #return precision_score(y, ypred)
     return score_cutoff
 
-print 'before cutoff loop'
-
-clf = LogisticRegression()
-clf = RandomForestClassifier(n_estimators=50, criterion='gini')
+print '\nRunning Cross Validation ...'
 
 scores = []
-
-for cutoff in np.arange(0.1, 0.9, 0.1):
+for cutoff in np.round(np.arange(0.1, 0.9, 0.1),decimals=1):
     # clf = LogisticRegression()
     validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
     scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
-    print cutoff
+    print '  ' + str(cutoff)
 
+print 'Done'
+
+################################################################################
+##############            ANALYSIS AND RESULTS           #######################
+################################################################################
 
 plt.figure(1)
-sns.boxplot(np.arange(0.1, 0.9, 0.1), scores)
+sns.boxplot(np.round(np.arange(0.1, 0.9, 0.1),decimals=1), scores)
 plt.title('F scores for each cutoff setting')
 plt.xlabel('each cutoff value')
 plt.ylabel('custom score')
-#plt.show()
+plt.grid()
 
-
-# http://scikit-learn.org/stable/modules/svm.html
-# http://scikit-learn.org/stable/modules/naive_bayes.html
-
-'''
-part 9
-'''
-cutoff = 0.6 # 0.6
-
-print 'create clf'
-
-#clf = LogisticRegression()
-
-clf = RandomForestClassifier(n_estimators=50, criterion='gini')
-
-# clf = svm.SVC(kernel='poly', degree=3)
-# clf = svm.SVC(probability=True)
-# clf = svm.SVC(kernel='sigmoid')
-
-print 'fit clf'
+print '\nFit classifier with sampled training data ...'
 clf.fit(sampled_X, sampled_Y)
+print 'Done\n'
 #y_predict = clf.predict(x_test)#output label
 
-print 'clf.predict_proba'
+#print 'clf.predict_proba'
 predict_proba = clf.predict_proba(x_test)
-print 'y_predict'
+#print 'y_predict'
 y_predict = (predict_proba[:,1]>cutoff).astype(int)
-print 'false_positive_rate'
+#print 'false_positive_rate'
 false_positive_rate, true_positive_rate, thresholds1 = roc_curve(y_test, predict_proba[:,1])
-print 'roc_auc'
+#print 'roc_auc'
 roc_auc = auc(false_positive_rate, true_positive_rate)
 
 plt.figure(2)
@@ -397,6 +415,7 @@ plt.plot(false_positive_rate, true_positive_rate, 'b', label = 'AUC = %0.2f'% ro
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
+plt.grid()
 plt.legend(loc="lower right")
 precision, recall, thresholds2 = precision_recall_curve(y_test, predict_proba[:,1])
 
@@ -405,8 +424,9 @@ plt.plot(recall, precision)
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.title('PR Curve')
-plt.show()
+plt.grid()
 
+TP, FP, FN, TN = 0, 0, 0, 0
 for i in xrange(len(y_predict)):
     if y_test[i]==1 and y_predict[i]==1:
         TP += 1
@@ -417,10 +437,13 @@ for i in xrange(len(y_predict)):
     if y_test[i]==0 and y_predict[i]==0:
         TN += 1
 
+print 'Result of classifier applied to test data: '
 print 'TP: '+ str(TP)
 print 'FP: '+ str(FP)
 print 'FN: '+ str(FN)
 print 'TN: '+ str(TN)
+
+plt.show()
 
 ###############################################################################
 ## END
