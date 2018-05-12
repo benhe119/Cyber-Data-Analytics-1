@@ -197,16 +197,27 @@ df_input[['issuer_id','label_int']] = df_input[['issuer_id','label_int']].astype
 x = df_input[df_input.columns[0:-1]].as_matrix()
 y = df_input[df_input.columns[-1]].as_matrix()
 
-# print '\n'
+####  Covariance matrix to CSV file
 
-# Covariance matrix to CSV file
+print '\nCovariance Matrix of df_input'
 
-# covMat = df_input.cov()
-# print '\nCovariance Matrix of df_input'
-# #print covMat
-# print '\nWriting cov matrix to csv file'
-# covMat.to_csv(path_or_buf='./covmat.csv')
-# print 'csv file created\n'
+df_normalized = df_input;
+
+var = df_normalized.var()
+
+for i in range(0,len(var)):
+    df_normalized.ix[:,i] *= 1/np.sqrt(var[i])
+
+
+# normdf = df_input.truediv(var, axis=1)
+# print var
+# print len(var)
+
+covMat = df_normalized.cov()
+# print covMat
+print '\nWriting cov matrix to csv file'
+covMat.to_csv(path_or_buf='./covmat.csv')
+print 'csv file created\n'
 
 ####################################################################
 ##    Training Dataset
@@ -295,14 +306,14 @@ print '  Fraud count: training data  = ' + str(np.sum(y_train)) + '; testing dat
 
 print "\nSampling data set ..."
 
-# sampler = SMOTE(kind='regular')
-# print '  SMOTE Oversampling'
+sampler = SMOTE(kind='regular')
+print '  SMOTE Oversampling'
 
 # sampler = RandomUnderSampler()
 # print '  Undersampling'
 
-sampler = RandomOverSampler()
-print '  Oversampling'
+# sampler = RandomOverSampler()
+# print '  Oversampling'
 
 print '  Sampling data ...'
 sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
