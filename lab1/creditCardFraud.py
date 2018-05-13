@@ -381,7 +381,7 @@ print '  Classifier used:'
 
 ########################## ENSEMBLE CLASSIFIERS ################################
 
-clf = XGBClassifier(max_depth=10,learning_rate=0.1,n_estimators=50)
+clf = XGBClassifier()#max_depth=10,learning_rate=0.1,n_estimators=50)
 print '  XG Boost Classifier'
 
 # clf = AdaBoostClassifier(n_estimators=50);
@@ -413,7 +413,9 @@ print '  XG Boost Classifier'
 ##############              CROSS VALIDATION             #######################
 ################################################################################
 
-cutoff = 0.5 # for y_predict
+cutoff = 0.65 # for y_predict
+print '\ncutoff:'
+print cutoff
 
 def cutoff_predict(clf, x, cutoff):
     return (clf.predict_proba(x)[:,1]>cutoff).astype(int)
@@ -428,29 +430,32 @@ def custom_score(cutoff):
 print '\nRunning Cross Validation ...'
 
 scores = []
-for cutoff in np.round(np.arange(0.1, 1.0, 0.1),decimals=1):
+for cutoffidx in np.round(np.arange(0.1, 1.0, 0.1),decimals=1):
     # clf = LogisticRegression()
     validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
     scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
-    print '  ' + str(cutoff)
+    print '  ' + str(cutoffidx)
 
 print 'Done'
-
-################################################################################
-##############            ANALYSIS AND RESULTS           #######################
-################################################################################
-
-plt.figure(1)
-sns.boxplot(np.round(np.arange(0.1, 1.0, 0.1),decimals=1), scores)
-plt.title('F scores for each cutoff setting')
-plt.xlabel('each cutoff value')
-plt.ylabel('custom score')
-plt.grid()
+#
+# ################################################################################
+# ##############            ANALYSIS AND RESULTS           #######################
+# ################################################################################
+#
+# plt.figure(1)
+# sns.boxplot(np.round(np.arange(0.1, 1.0, 0.1),decimals=1), scores)
+# plt.title('F scores for each cutoff setting')
+# plt.xlabel('each cutoff value')
+# plt.ylabel('custom score')
+# plt.grid()
 
 print '\nFit classifier with sampled training data ...'
 clf.fit(sampled_X, sampled_Y)
 print 'Done\n'
 y_predict = clf.predict(x_test)#output label
+
+x_test = x_in
+y_test = y_in
 
 #print 'clf.predict_proba'
 predict_proba = clf.predict_proba(x_test)
