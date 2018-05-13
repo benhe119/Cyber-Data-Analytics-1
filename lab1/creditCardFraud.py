@@ -34,6 +34,8 @@ from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 #from imblearn.unbalanced_dataset import UnbalancedDataset
 
+from xgboost import XGBClassifier
+
 ####################################################################
 ## 2 Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
 ####################################################################
@@ -199,25 +201,25 @@ y = df_input[df_input.columns[-1]].as_matrix()
 
 ####  Covariance matrix to CSV file
 
-print '\nCovariance Matrix of df_input'
-
-df_normalized = df_input;
-
-var = df_normalized.var()
-
-for i in range(0,len(var)):
-    df_normalized.ix[:,i] *= 1/np.sqrt(var[i])
-
-
-# normdf = df_input.truediv(var, axis=1)
-# print var
-# print len(var)
-
-covMat = df_normalized.cov()
-# print covMat
-print '\nWriting cov matrix to csv file'
-covMat.to_csv(path_or_buf='./covmat.csv')
-print 'csv file created\n'
+# print '\nCovariance Matrix of df_input'
+#
+# df_normalized = df_input;
+#
+# var = df_normalized.var()
+#
+# for i in range(0,len(var)):
+#     df_normalized.ix[:,i] *= 1/np.sqrt(var[i])
+#
+#
+# # normdf = df_input.truediv(var, axis=1)
+# # print var
+# # print len(var)
+#
+# covMat = df_normalized.cov()
+# # print covMat
+# print '\nWriting cov matrix to csv file'
+# covMat.to_csv(path_or_buf='./covmat.csv')
+# print 'csv file created\n'
 
 ####################################################################
 ##    Training Dataset
@@ -306,18 +308,31 @@ print '  Fraud count: training data  = ' + str(np.sum(y_train)) + '; testing dat
 
 print "\nSampling data set ..."
 
-sampler = SMOTE(kind='regular')
-print '  SMOTE Oversampling'
 
-# sampler = RandomUnderSampler()
-# print '  Undersampling'
 
-# sampler = RandomOverSampler()
-# print '  Oversampling'
+for clfidx in range(0,4):
+    print clfidx
+    if clfidx == 0:
+        sampler = SMOTE(kind='regular')
+        print '  SMOTE Oversampling'
+        print '  Sampling data ...'
+        sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
+    elif clfidx == 1:
+        sampler = RandomUnderSampler()
+        print '  Undersampling'
+        print '  Sampling data ...'
+        sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
+    elif clfidx == 2:
+        sampler = RandomOverSampler()
+        print '  Oversampling'
+        print '  Sampling data ...'
+        sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
+    else:
+        print '  No Sampling ...'
+        sampled_X = x_train;
+        sampled_Y = y_train;
 
-print '  Sampling data ...'
-sampled_X, sampled_Y = sampler.fit_sample(x_train, y_train)
-print '  Done\n'
+    print '  Done\n'
 
 # print 'After sampler\n'
 # print 'sampled_X size'
@@ -326,10 +341,10 @@ print '  Done\n'
 # print sampled_Y.size
 # print '\n'
 
-print 'Sampled Data'
-print '  Train data size: ' + str(sampled_X.shape)
-print '  Fraud count: training data = ' + str(np.sum(sampled_Y.shape))
-print '  * Remember: sampling not done on test data'
+    print 'Sampled Data'
+    print '  Train data size: ' + str(sampled_X.shape)
+    print '  Fraud count: training data = ' + str(np.sum(sampled_Y.shape))
+    print '  * Remember: sampling not done on test data'
 
 ################################################################################
 ###########              DEFINE CLASSIFIER                      ################
@@ -338,23 +353,32 @@ print '  * Remember: sampling not done on test data'
 # http://scikit-learn.org/stable/modules/svm.html
 # http://scikit-learn.org/stable/modules/naive_bayes.html
 
-print '\nCreating classifier object "clf"'
-print '  Classifier used:'
+
+
+    print '\nCreating classifier object "clf"'
+    print '  Classifier used:'
+
+########################   NORMAL CLASSIFIERS   ################################
 
 ########## Logistical Regression ##############
 
-# clf = LogisticRegression()
-# print '  Logistical Regression'
+    # clf = LogisticRegression()
+    # print '  Logistical Regression'
 
 ########## Random Forest Classifier ###########
 
-# clf = RandomForestClassifier(n_estimators=5, criterion='gini')
-# print '  Random Forest Classifier'
+    # clf = RandomForestClassifier(n_estimators=5, criterion='gini')
+    # print '  Random Forest Classifier'
 
 ########## Naive Bayes ########################
 
-clf = GaussianNB()
-print '  Gaussian Naive Bayes'
+    clf = GaussianNB()
+    print '  Gaussian Naive Bayes'
+
+########################    BOOST CLASSIFIERS   ################################
+
+# clf = XGBClassifier()
+# print '  XG Boost Classifier'
 
 ################################################################################
 
@@ -371,84 +395,189 @@ print '  Gaussian Naive Bayes'
 ##############              CROSS VALIDATION             #######################
 ################################################################################
 
-cutoff = 0.6 # redundant?
-
-def cutoff_predict(clf, x, cutoff):
-    return (clf.predict_proba(x)[:,1]>cutoff).astype(int)
-
-def custom_score(cutoff):
-    def score_cutoff(clf, x, y):
-        ypred = cutoff_predict(clf, x, cutoff)
-        return f1_score(y, ypred)
-        #return precision_score(y, ypred)
-    return score_cutoff
-
-print '\nRunning Cross Validation ...'
-
-scores = []
-for cutoff in np.round(np.arange(0.1, 0.9, 0.1),decimals=1):
-    # clf = LogisticRegression()
-    validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
-    scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
-    print '  ' + str(cutoff)
-
-print 'Done'
+    cutoff = 0.6 # for y_predict
+#
+# def cutoff_predict(clf, x, cutoff):
+#     return (clf.predict_proba(x)[:,1]>cutoff).astype(int)
+#
+# def custom_score(cutoff):
+#     def score_cutoff(clf, x, y):
+#         ypred = cutoff_predict(clf, x, cutoff)
+#         return f1_score(y, ypred)
+#         #return precision_score(y, ypred)
+#     return score_cutoff
+#
+# print '\nRunning Cross Validation ...'
+#
+# scores = []
+# for cutoff in np.round(np.arange(0.1, 0.9, 0.1),decimals=1):
+#     # clf = LogisticRegression()
+#     validated = model_selection.cross_val_score(clf, sampled_X , sampled_Y, cv = 10, scoring = custom_score(cutoff))
+#     scores.append(validated) # possible pre-allocation needed? - NO => list length = 9
+#     print '  ' + str(cutoff)
+#
+# print 'Done'
 
 ################################################################################
 ##############            ANALYSIS AND RESULTS           #######################
 ################################################################################
 
-plt.figure(1)
-sns.boxplot(np.round(np.arange(0.1, 0.9, 0.1),decimals=1), scores)
-plt.title('F scores for each cutoff setting')
-plt.xlabel('each cutoff value')
-plt.ylabel('custom score')
-plt.grid()
+# plt.figure(1)
+# sns.boxplot(np.round(np.arange(0.1, 0.9, 0.1),decimals=1), scores)
+# plt.title('F scores for each cutoff setting')
+# plt.xlabel('each cutoff value')
+# plt.ylabel('custom score')
+# plt.grid()
 
-print '\nFit classifier with sampled training data ...'
-clf.fit(sampled_X, sampled_Y)
-print 'Done\n'
+    print '\nFit classifier with sampled training data ...'
+    clf.fit(sampled_X, sampled_Y)
+    print 'Done\n'
 #y_predict = clf.predict(x_test)#output label
+    if clfidx == 0: # smote
+        #print 'clf.predict_proba'
+            predict_proba_smote = clf.predict_proba(x_test)
+        #print 'y_predict'
+            y_predict_smote = (predict_proba_smote[:,1]>cutoff).astype(int)
+        #print 'false_positive_rate'
 
-#print 'clf.predict_proba'
-predict_proba = clf.predict_proba(x_test)
-#print 'y_predict'
-y_predict = (predict_proba[:,1]>cutoff).astype(int)
-#print 'false_positive_rate'
-false_positive_rate, true_positive_rate, thresholds1 = roc_curve(y_test, predict_proba[:,1])
-#print 'roc_auc'
-roc_auc = auc(false_positive_rate, true_positive_rate)
+            false_positive_rate_smote, true_positive_rate_smote, thresholds1_smote = roc_curve(y_test, predict_proba_smote[:,1])
+        #print 'roc_auc'
+            roc_auc_smote = auc(false_positive_rate_smote, true_positive_rate_smote)
+    elif clfidx == 1: # under
+        #print 'clf.predict_proba'
+            predict_proba_under = clf.predict_proba(x_test)
+        #print 'y_predict'
+            y_predict_under = (predict_proba_under[:,1]>cutoff).astype(int)
+        #print 'false_positive_rate'
 
-plt.figure(2)
+            false_positive_rate_under, true_positive_rate_under, thresholds1_under = roc_curve(y_test, predict_proba_under[:,1])
+        #print 'roc_auc'
+            roc_auc_under = auc(false_positive_rate_under, true_positive_rate_under)
+    elif clfidx == 2: # over
+        #print 'clf.predict_proba'
+            predict_proba_over = clf.predict_proba(x_test)
+        #print 'y_predict'
+            y_predict_over = (predict_proba_over[:,1]>cutoff).astype(int)
+        #print 'false_positive_rate'
+
+            false_positive_rate_over, true_positive_rate_over, thresholds1_over = roc_curve(y_test, predict_proba_over[:,1])
+        #print 'roc_auc'
+            roc_auc_over = auc(false_positive_rate_over, true_positive_rate_over)
+    else:
+        #print 'clf.predict_proba'
+            predict_proba_none = clf.predict_proba(x_test)
+        #print 'y_predict'
+            y_predict_none = (predict_proba_over[:,1]>cutoff).astype(int)
+        #print 'false_positive_rate'
+
+            false_positive_rate_none, true_positive_rate_none, thresholds1_none = roc_curve(y_test, predict_proba_none[:,1])
+        #print 'roc_auc'
+            roc_auc_none = auc(false_positive_rate_none, true_positive_rate_none)
+
+
+
+
+## END FOR LOOP
+
+plt.figure(1)
 
 plt.subplot(1, 2, 1)
-plt.plot(false_positive_rate, true_positive_rate, 'b', label = 'AUC = %0.2f'% roc_auc)
+plt.hold(1)
+plt.plot(false_positive_rate_none, true_positive_rate_none, 'k', label = 'None AUC = %0.2f'% roc_auc_none)
+plt.plot(false_positive_rate_under, true_positive_rate_under, 'g', label = 'Under AUC = %0.2f'% roc_auc_under)
+plt.plot(false_positive_rate_over, true_positive_rate_over, 'r', label = 'Over AUC = %0.2f'% roc_auc_over)
+plt.plot(false_positive_rate_smote, true_positive_rate_smote, 'b', label = 'SMOTE AUC = %0.2f'% roc_auc_smote)
+
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
 plt.grid()
 plt.legend(loc="lower right")
-precision, recall, thresholds2 = precision_recall_curve(y_test, predict_proba[:,1])
+
+precision_smote, recall_smote, thresholds2_smote = precision_recall_curve(y_test, predict_proba_smote[:,1])
+precision_under, recall_under, thresholds2_under = precision_recall_curve(y_test, predict_proba_under[:,1])
+precision_over, recall_over, thresholds2_over = precision_recall_curve(y_test, predict_proba_over[:,1])
+precision_none, recall_none, thresholds2_none = precision_recall_curve(y_test, predict_proba_none[:,1])
 
 plt.subplot(1, 2, 2)
-plt.plot(recall, precision)
+plt.hold(1)
+plt.plot(recall_none, precision_none, 'k', label = 'None')
+plt.plot(recall_under, precision_under, 'g', label = 'under_sampling')
+plt.plot(recall_over, precision_over, 'r', label = 'Oversampling')
+plt.plot(recall_smote, precision_smote, 'b', label = 'SMOTE')
 plt.xlabel('Recall')
 plt.ylabel('Precision')
 plt.title('PR Curve')
 plt.grid()
+plt.legend(loc="upper right")
 
+# SMOTE
 TP, FP, FN, TN = 0, 0, 0, 0
-for i in xrange(len(y_predict)):
-    if y_test[i]==1 and y_predict[i]==1:
+for i in xrange(len(y_predict_smote)):
+    if y_test[i]==1 and y_predict_smote[i]==1:
         TP += 1
-    if y_test[i]==0 and y_predict[i]==1:
+    if y_test[i]==0 and y_predict_smote[i]==1:
         FP += 1
-    if y_test[i]==1 and y_predict[i]==0:
+    if y_test[i]==1 and y_predict_smote[i]==0:
         FN += 1
-    if y_test[i]==0 and y_predict[i]==0:
+    if y_test[i]==0 and y_predict_smote[i]==0:
         TN += 1
 
-print 'Result of classifier applied to test data: '
+print 'Result of classifier applied to test data: SMOTED'
+print 'TP: '+ str(TP)
+print 'FP: '+ str(FP)
+print 'FN: '+ str(FN)
+print 'TN: '+ str(TN)
+
+# under_sampling
+TP, FP, FN, TN = 0, 0, 0, 0
+for i in xrange(len(y_predict_under)):
+    if y_test[i]==1 and y_predict_under[i]==1:
+        TP += 1
+    if y_test[i]==0 and y_predict_under[i]==1:
+        FP += 1
+    if y_test[i]==1 and y_predict_under[i]==0:
+        FN += 1
+    if y_test[i]==0 and y_predict_under[i]==0:
+        TN += 1
+
+print 'Result of classifier applied to test data: UNDERSAMPLING'
+print 'TP: '+ str(TP)
+print 'FP: '+ str(FP)
+print 'FN: '+ str(FN)
+print 'TN: '+ str(TN)
+
+# over_sampling
+TP, FP, FN, TN = 0, 0, 0, 0
+for i in xrange(len(y_predict_over)):
+    if y_test[i]==1 and y_predict_over[i]==1:
+        TP += 1
+    if y_test[i]==0 and y_predict_over[i]==1:
+        FP += 1
+    if y_test[i]==1 and y_predict_over[i]==0:
+        FN += 1
+    if y_test[i]==0 and y_predict_over[i]==0:
+        TN += 1
+
+print 'Result of classifier applied to test data: OVERSAMPLING'
+print 'TP: '+ str(TP)
+print 'FP: '+ str(FP)
+print 'FN: '+ str(FN)
+print 'TN: '+ str(TN)
+
+# no sampling
+TP, FP, FN, TN = 0, 0, 0, 0
+for i in xrange(len(y_predict_none)):
+    if y_test[i]==1 and y_predict_none[i]==1:
+        TP += 1
+    if y_test[i]==0 and y_predict_none[i]==1:
+        FP += 1
+    if y_test[i]==1 and y_predict_none[i]==0:
+        FN += 1
+    if y_test[i]==0 and y_predict_none[i]==0:
+        TN += 1
+
+print 'Result of classifier applied to test data: NONE'
 print 'TP: '+ str(TP)
 print 'FP: '+ str(FP)
 print 'FN: '+ str(FN)
@@ -459,92 +588,3 @@ plt.show()
 ###############################################################################
 ## END
 ###############################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-''' ERNST PREV
-
-TP, FP, FN, TN = 0, 0, 0, 0
-x_array = np.array(x)
-#x_array = preprocessing.normalize(np.array(x), norm='l2')
-enc = preprocessing.OneHotEncoder()
-#enc = preprocessing.LabelEncoder()
-enc.fit(x_array[:,0:-1])
-
-x_encode = enc.transform(x_array[:,0:-1]).toarray()
-
-min_max_scaler = preprocessing.MinMaxScaler()
-
-a = x_array[:,-1]
-
-# reshape
-shape = a.shape
-a = np.reshape(a, (-1, 1))
-
-a = min_max_scaler.fit_transform(a)
-
-# reshape back
-a = np.reshape(a, shape)
-print a.shape
-
-x_array[:,-1] = a
-x_in = np.c_[x_encode,x_array[:,-1]]
-y_in = np.array(y)
-x_train, x_test, y_train, y_test = cross_validation.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
-
-print "Training date set"
-sampler = RandomUnderSampler()
-
-#sampler = RandomOverSampler()
-#sampler = SMOTE(kind='regular')
-usx, usy = sampler.fit_sample(x_train, y_train)
-'''
-
-
-''' ALEX PREV
-TP, FP, FN, TN = 0, 0, 0, 0
-x_array = np.array(x)
-
-print 'x_array:'
-print x_array
-print ''
-
-#x_array = preprocessing.normalize(np.array(x), norm='l2')
-enc = preprocessing.OneHotEncoder() # sklearn
-#enc = preprocessing.LabelEncoder()
-
-# removes last column of x_array (WHY??)
-enc.fit(x_array[:,0:-1])
-x_encode = enc.transform(x_array[:,0:-1]).toarray()
-min_max_scaler = preprocessing.MinMaxScaler()
-x_array[:,-1] = min_max_scaler.fit_transform(x_array[:,-1])
-x_in = np.c_[x_encode,x_array[:,-1]]
-y_in = np.array(y)
-x_train, x_test, y_train, y_test = cross_validation.train_test_split(x_in, y_in, test_size = 0.2)#test_size: proportion of train/test data
-print "Training data set"
-sampler = UnderSampler(ratio=10, verbose = True)
-#sampler = OverSampler(verbose = True)
-#sampler = SMOTE(kind='regular', verbose = True)
-usx, usy = sampler.fit_transform(x_train, y_train)
-
-#raw_input('Press RETURN to exit')
-'''
