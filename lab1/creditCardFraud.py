@@ -45,7 +45,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 ## 2 Read and Edit Feature Set (OBAINED FROM KNIME) from CSV File
 ####################################################################
 
-df = pd.read_csv('./knimepreprocessedfeatures.csv')  # knimepreprocessedfeatures knime_40times_features
+df = pd.read_csv('./deliverables/knimepreprocessedfeatures.csv')  # knimepreprocessedfeatures knime_40times_features
 
 print '\nCREDIT CARD FRAUD - ASSIGNMENT 1'
 
@@ -56,6 +56,8 @@ print '\nSee google drive document for field descriptions'
 
 print "\nRaw data shape from KNIME dataset file: knimepreprocessedfeatures.csv"
 print df.shape
+
+#print list(df.columns.values)
 
 ## COMMENTED BELOW DONE IN KNIME:
 # convert string to datetime
