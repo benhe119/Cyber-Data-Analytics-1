@@ -18,7 +18,8 @@ from pandas.tools.plotting import autocorrelation_plot
 from statsmodels.graphics.api import qqplot
 import scipy.fftpack as fftpk
 import scipy.signal as sgnl
-from discretize_filter import discretize_L_Txx, discretize_F_PUxx, discretize_S_PUxx, discretize_P_Jxxx
+from filter_data import filter, filter_F_PUxx, filter_S_PUxx, filter_P_Jxxx
+from discretize_data import discretizeBinary, discretizeSAX
 
 ### READ AND EDIT CSV FILE ###   ###############################################
 df = pd.read_csv("./data/BATADAL_training_dataset_1.csv",delimiter=',');
@@ -39,9 +40,16 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-discretize_L_Txx(L_Txx,df)
+# filter the noise from the data fields
+filter(L_Txx,df)
 
-plt.show()
+# apply PAA discretization
+#discretizeBinary(L_Txx,df)
+
+discretizeSAX(L_Txx,df)
+
+
+# plt.show()
 #df_F_PUxx = discretize_F_PUxx(F_PUxx)
 
 
