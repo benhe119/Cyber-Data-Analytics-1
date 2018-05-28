@@ -40,19 +40,32 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-# filter the noise from the data fields
-filter(L_Txx,df)
+analysisMethod = 'N-gram'
 
-# apply PAA discretization
+if analysisMethod == 'ARMA':
+    print 'arma'
+elif analysisMethod == 'N-gram':
+    print 'n-grams'
+    # filter data using FFT
+    filter(L_Txx,df)
+    # discretize data using SAX discretization
+    discretizeSAX(L_Txx,df)
+
+elif analysisMethod == 'PCA':
+    print 'pca'
+else:
+    # do nothing
+    print 'no analysis method'
+
+print 'Done!'
+
 #discretizeBinary(L_Txx,df)
 
-discretizeSAX(L_Txx,df)
-
-
-# plt.show()
-#df_F_PUxx = discretize_F_PUxx(F_PUxx)
+# discretizes the dataset using SAX - only the first field for now
 
 
 
-    # b,a = sgnl.iirfilter(10,0.4,btype='lowpass',analog=False,ftype='butter',output='ba')
-    # yfft_filt =
+
+
+
+# asdf
