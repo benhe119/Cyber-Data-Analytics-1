@@ -78,7 +78,7 @@ def discretizeSAX(list, dataframe):
     y_time = field_matrix;
     y_time = np.asarray(y_time).reshape(-1)
 
-    saxobject = sax.SAX(wordSize = 2000, alphabetSize = 5, epsilon = 1e-6)
+    saxobject = sax.SAX(wordSize = 2000, alphabetSize = 3, epsilon = 1e-6)
 
     letterseq = saxobject.to_letter_rep(np.transpose(y_time))
     # print letterseq[0]
@@ -86,6 +86,8 @@ def discretizeSAX(list, dataframe):
     # print letterseq[1]
 
     xlist, ylist = saxobject.get_results(letterseq)
+
+    print len(xlist)
 
     saxobject.plot_results(x_axis_list=xlist,y_axis_list=ylist)
 

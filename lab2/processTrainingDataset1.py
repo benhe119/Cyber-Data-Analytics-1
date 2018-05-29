@@ -20,6 +20,7 @@ import scipy.fftpack as fftpk
 import scipy.signal as sgnl
 from filter_data import filter, filter_F_PUxx, filter_S_PUxx, filter_P_Jxxx
 from discretize_data import discretizeBinary, discretizeSAX
+from arma_models import fitAR, fitARMA, fitARIMA
 
 ### READ AND EDIT CSV FILE ###   ###############################################
 df = pd.read_csv("./data/BATADAL_training_dataset_1.csv",delimiter=',');
@@ -29,7 +30,8 @@ df = pd.read_csv("./data/BATADAL_training_dataset_1.csv",delimiter=',');
 #print list(df.columns.values)
 #df.sort(columns='L_T1',axis=0,ascending=True,inplace=True)
 # dat_L_T1.plot(figsize=(6,4))
-df.sort_values(by = 'DATETIME', ascending = True, inplace=True)
+
+# df.sort_values(by = 'DATETIME', ascending = True, inplace=True)
 
 # print '\ndurbin watson statistics: ' + str(sm.stats.durbin_watson(dta))
 
@@ -40,16 +42,51 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'N-gram'
+analysisMethod = 'ARMA'
 
 if analysisMethod == 'ARMA':
     print 'arma'
+    # filter data
+    filter(["L_T1"],df)
+    # learn ARMA model
+    # fittedModel = fitARMA(dataframefield=df[["L_T1"]],p=2,q=0)
+    # plot results
+    # print fittedModel.params
+    # print fittedModel.aic
+    # print fittedModel.bic
+
+    dta = df[["L_T1"]]
+
+    dta.plot(figsize=(4,3));
+    plt.show()
+
+    # no dependency on lags, quite centered (don't need ARIMA, only ARMA or AR)
+    # autocorrelation_plot(dta)
+    # plt.show()
+
+    model = sm.tsa.ARMA(dta, order=(2,0)).fit()
+    print model.params
+    # model_fit = model.fit(disp=0)
+    # print model_fit.summary()
+
+    print model.aic
+    print model.bic
+    print model.hqic
+
+
+    # arma_mod20 = sm.tsa.ARMA(dta, (p,q)).fit()
+    #
+    print '\ndurbin watson statistics: ' + str(sm.stats.durbin_watson(dta))
+
+    #predictVector =
+
 elif analysisMethod == 'N-gram':
     print 'n-grams'
     # filter data using FFT
     filter(L_Txx,df)
     # discretize data using SAX discretization
     discretizeSAX(L_Txx,df)
+    # create n-gram from discretized data
 
 elif analysisMethod == 'PCA':
     print 'pca'
