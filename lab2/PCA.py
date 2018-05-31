@@ -25,6 +25,8 @@ def PCA(csv):
 	pca.fit(training_normalized)
 	pca_model = pca.transform(training_normalized)
 
+	print pca_model
+
 	#output variance and variance_ratio
 	print np.sort(pca.explained_variance_)[::-1]
 	print np.sort(pca.explained_variance_ratio_)[::-1]
@@ -39,14 +41,14 @@ def PCA(csv):
 	plt.plot(x_axis, pca.explained_variance_ratio_)
 	#plt.show()
 
-	#plot cumulative variance 
+	#plot cumulative variance
 	plt.xlabel('Principal Components')
 	plt.ylabel('Cumulative Variance Captured')
 	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
 	#plt.show()
 
 	#plot one column
-	csv = csv.assign(PC1=pca_model[:,0])	
+	csv = csv.assign(PC1=pca_model[:,0])
 	csv['PC1'].plot(figsize=(15,5))
 	plt.show();
 
@@ -72,11 +74,12 @@ def PCA_detection(csv):
 	pca.explained_variance_ratio_.cumsum()
 
 	#load and process the test_dataset
-	test_dataset = pd.read_csv("./data/BATADAL_training_dataset_1.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
-	
+	test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
+
+	print test_dataset
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
-	labels =  test_dataset['ATT_FLAG']
-	del test_dataset['ATT_FLAG']
+	# labels =  test_dataset['ATT_FLAG']
+	# del test_dataset['ATT_FLAG']
 
 
 	test_normalized = scaler.fit_transform(test_dataset)
@@ -106,12 +109,12 @@ def PCA_detection(csv):
 	#Calculate SPE for each y_residual
 	spe = np.zeros((test_normalized.shape[0]))
 
-	# na will be set to 1 if the spe is greater than the threshold 
+	# na will be set to 1 if the spe is greater than the threshold
 	na = np.zeros((test_normalized.shape[0]))
 	threshold = 500
 	for i in range(test_normalized.shape[0]):
-	    spe[i] = np.square(np.sum(np.subtract(y_residual[i], test_normalized[i])))     
-	    
+	    spe[i] = np.square(np.sum(np.subtract(y_residual[i], test_normalized[i])))
+
 	    # if spe is greater than threshold then classify as attack by setting na to 1
 	    if(spe[i] > threshold):
 	        na[i] = 1
@@ -119,6 +122,8 @@ def PCA_detection(csv):
 	test_dataset = test_dataset.assign(ResidualVector=spe)
 	test_dataset['ResidualVector'].plot(figsize=(15,5))
 	plt.show()
+
+	return
 
 	# compute confusion matrix (this isn't working as it should..)
 	tp = 0
@@ -131,16 +136,10 @@ def PCA_detection(csv):
 	    if(labels[i] == 0 and na[i] == 1):
 	        fp = fp + 1
 	    if(labels[i] == 0 and na[i] == 0):
-	        fn = fn + 1    
+	        fn = fn + 1
 	    if(labels[i] == 1 and na[i] == 0):
 	        tn = tn + 1
 	print "TP: {} ".format(tp)
 	print "FP: {} ".format(fp)
 	print "FN: {} ".format(fn)
 	print "TN: {} ".format(tn)
-
-	return
-
-
-
-
