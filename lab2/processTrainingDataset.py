@@ -105,16 +105,29 @@ elif analysisMethod == 'N-gram':
     # filter data using FFT
     filter(L_Txx,df_train_1)
 
+    datafieldname = 'L_T2'
+
     # discretize data using SAX discretization
-    timestampsTrain1, discretizedTrain1Data = discretizeSAX(L_Txx,df_train_1)
-    timestampsTrain2, discretizedTrain2Data = discretizeSAX(L_Txx,df_train_2)
+    timestampsTrain1, discretizedTrain1Data = discretizeSAX(datafieldname,df_train_1)
+    timestampsTrain2, discretizedTrain2Data = discretizeSAX(datafieldname,df_train_2)
 
     # create n-gram from discretized data
-    anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
+    anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 6, 0.002) #traindata, testdata, n-gram size, alert threshold
+
+    # remove additional entries in timestampsTrain2
+    lengthAnomalyList = len(anomalyList)
+    lengthResultsList = len(timestampsTrain2)
+
+    # remove last values in timestamp until it matches the anomaly list length
+    # this is because the discretization uses the data DIV n (of n-gram) and is
+    # therefore different in length
+    while (len(anomalyList) != len(timestampsTrain2)):
+        timestampsTrain2 = timestampsTrain2[:-1] # remove last entry
+        #print 'while loop entered'
 
     plt.figure()
-    # plt.title('Time domain L_T' + str(idxl))
     plt.plot(timestampsTrain2,anomalyList,label='y filtered')
+    plt.title('Threshold breached for different')
     plt.show()
 
 
@@ -128,13 +141,15 @@ else:
 
 print 'Done!'
 
-#discretizeBinary(L_Txx,df)
-
-# discretizes the dataset using SAX - only the first field for now
 
 
 
 
 
 
-# asdf
+
+
+
+
+
+#

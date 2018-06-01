@@ -62,9 +62,9 @@ def discretizeBinary(list, dataframe):
 
     return # void
 
-def discretizeSAX(list, dataframe):
+def discretizeSAX(fieldname, dataframe):
 
-    fieldname = 'L_T2'
+    #fieldname = 'L_T2'
 
     df_field = dataframe[[fieldname]]
     field_matrix = df_field.values;

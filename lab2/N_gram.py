@@ -34,18 +34,18 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	except StopIteration:
 		pass	#python has no hasNext() kinde function, so we stop with StopIteration error
 
-	#determine the odds
+	# determine the odds
 	for key in states:
 		odds = states[key] / count
-		print key + "=>" + str(odds)
+		print key + " => " + str(odds)
 		states[key] = states[key] / count
 
-	#now check the test data
+	# now check the test data
 	grams = ngrams(discretizedTestData, window_size)
 
 	previousGram = ""
 
-	anomalyList = [0]
+	anomalyList = []
 
 	try:
    		while True:
@@ -77,6 +77,7 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	# anomalyList.append(0)
 	# anomalyList.append(0)
 	print len(anomalyList)
+	print len(discretizedTestData)
 
 	#print discretizedTestData
 
