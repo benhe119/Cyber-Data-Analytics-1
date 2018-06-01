@@ -25,6 +25,7 @@ from discretize_data import discretizeBinary, discretizeSAX
 
 from ARMA import fitARMA
 from PCA import PCA, PCA_detection
+from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
 
 ### READ AND EDIT CSV FILE ###   ###############################################
@@ -55,7 +56,7 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'ARMA'
+analysisMethod = 'N-gram'
 
 print 'Analysis method: ' + analysisMethod
 
@@ -90,7 +91,7 @@ if analysisMethod == 'ARMA':
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2014','2015'))
     # datetimefield = currentDataset.index
 
-        
+
 
     #print currentDataset.describe()
 
@@ -105,15 +106,11 @@ elif analysisMethod == 'N-gram':
     filter(L_Txx,df_train_1)
 
     # discretize data using SAX discretization
-    discretizeSAX(L_Txx,df_train_1)
+    discretizedTrainData = discretizeSAX(L_Txx,df_train_1)
+    discretizedTestData = discretizeSAX(L_Txx,df_train_2)
 
     # create n-gram from discretized data
-
-
-
-
-
-
+    N_gram(discretizedTrainData, discretizedTestData, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
 
 
 
