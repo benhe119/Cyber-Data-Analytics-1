@@ -64,7 +64,7 @@ def discretizeBinary(list, dataframe):
 
 def discretizeSAX(list, dataframe):
 
-    fieldname = 'L_T1'
+    fieldname = 'L_T2'
 
     df_field = dataframe[[fieldname]]
     field_matrix = df_field.values;
@@ -87,7 +87,11 @@ def discretizeSAX(list, dataframe):
 
     xlist, ylist = saxobject.get_results(letterseq)
 
-    #uncomment to show plot
-    #saxobject.plot_results(x_axis_list=xlist,y_axis_list=ylist)
+    print xlist
 
-    return ylist # void
+    #uncomment to show plot
+    saxobject.plot_results(x_axis_list=xlist,y_axis_list=ylist)
+
+    return xlist, ylist # void
+
+ # void

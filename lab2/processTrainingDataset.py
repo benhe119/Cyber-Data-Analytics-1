@@ -56,7 +56,7 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'PCA'
+analysisMethod = 'N-gram'
 
 print 'Analysis method: ' + analysisMethod
 
@@ -106,13 +106,16 @@ elif analysisMethod == 'N-gram':
     filter(L_Txx,df_train_1)
 
     # discretize data using SAX discretization
-    discretizedTrainData = discretizeSAX(L_Txx,df_train_1)
-    discretizedTestData = discretizeSAX(L_Txx,df_train_2)
+    timestampsTrain1, discretizedTrain1Data = discretizeSAX(L_Txx,df_train_1)
+    timestampsTrain2, discretizedTrain2Data = discretizeSAX(L_Txx,df_train_2)
 
     # create n-gram from discretized data
-    N_gram(discretizedTrainData, discretizedTestData, 4, 0.002) #traindata, testdata, n-gram size, alert threshold
+    anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
 
-
+    plt.figure()
+    # plt.title('Time domain L_T' + str(idxl))
+    plt.plot(timestampsTrain2,anomalyList,label='y filtered')
+    plt.show()
 
 
 

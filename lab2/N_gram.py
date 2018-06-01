@@ -45,6 +45,8 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 
 	previousGram = ""
 
+	anomalyList = [0]
+
 	try:
    		while True:
    			#get the next gram
@@ -55,15 +57,30 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 			key = previousGram+"-"+currentGram
 
 			#check the odds of this transition
-			if key not in states:
+			if previousGram == "":
+				print 'nuffin'# nothing
+				anomalyList.append(0)
+			elif key not in states:
 				print "!Anomolie state change:"+key+" not seen in train set"
+				anomalyList.append(1)
 			elif states[key] < threshold:
 				print "!Anomolie state change:"+key+" lower then threshold"
+				anomalyList.append(1)
+			else:
+				anomalyList.append(0)
 
 			#store the old key
 			previousGram = currentGram
 	except StopIteration:
 		pass
+
+	# anomalyList.append(0)
+	# anomalyList.append(0)
+	print len(anomalyList)
+
+	#print discretizedTestData
+
+
 
 
 	#create the probabilities array
@@ -72,7 +89,7 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	#
 	#print states
 
-	return
+	return anomalyList
 
 def createKey(idx, grams):
 	if idx == len(grams):
