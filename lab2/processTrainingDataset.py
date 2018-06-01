@@ -55,15 +55,26 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'NONE'
+analysisMethod = 'ARMA'
 
 print 'Analysis method: ' + analysisMethod
 
+# intermediate
+# fig = plt.figure(figsize=(8,6))
+# ax = fig.add_subplot(111)
+# ax = df_test["F_PU1"].plot(ax=ax,label='3')
+# ax = df_test["F_PU2"].plot(ax=ax,label='5')
+# ax = df_test["F_PU4"].plot(ax=ax,label='9')
+# plt.legend()
+# plt.show()
+
 if analysisMethod == 'ARMA':
 
+    currentDataset = df_train_2
+
     # filter data
-    for field in [" L_T4"]: # L_Txx list
-        filter([field],df_train_1)
+    for field in ["F_PU1"]: #["L_T1"]: # L_Txx list
+        filter([field],currentDataset)
 
     # only choose one field for the ARMA model
     # dta = df[["L_T1"]]
@@ -74,22 +85,18 @@ if analysisMethod == 'ARMA':
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2015','2018'))
     # del df["DATETIME"]
 
-    print df_train_1.index.min()
-    print df_train_1.index.max()
+    # print currentDataset.index.min()
+    # print currentDataset.index.max()
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2014','2015'))
-    datetimefield = df_train_1.index
+    # datetimefield = currentDataset.index
 
+        
 
-    for field in [" L_T4"]:
-        fitARMA(df_train_1[field],datetimefield,p=2,q=0)
+    #print currentDataset.describe()
 
-
-
-
-
-
-
-
+    # for field in ["F_PU1"]: #["L_T1"]:
+    #     fitARMA(currentDataset,field,datetimefield,p=2,q=0)
+    # plt.show()
 
 
 

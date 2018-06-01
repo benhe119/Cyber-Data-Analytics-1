@@ -15,6 +15,8 @@ from pandas.tools.plotting import autocorrelation_plot
 
 from statsmodels.graphics.api import qqplot
 
+from filter_data import filter
+
 ### READ AND EDIT CSV FILE #####################################################
 
 df = pd.read_csv("./sunspots.csv",delimiter=';',names=["midyear","SUNACTIVITY","MeanStdDev","Observation","Marker"])
@@ -30,17 +32,21 @@ df.index = pd.Index(sm.tsa.datetools.dates_from_range('1700', '2017'))
 # exctract only sunactivity for analysis
 dta = df[['SUNACTIVITY']]
 
+# dta = filter(['SUNACTIVITY'],dta)
+
 ### ANALYZE DATA & AUTOCORRELATION GRAPHS ######################################
 
 # raw data signal
 dta.plot(figsize=(6,4));
+
+plt.show()
 
 print '\ndurbin watson statistics: ' + str(sm.stats.durbin_watson(dta))
 
 ## use matplotlib to plot autocorrelation
 fig = plt.figure(figsize=(12,8))
 ax1 = fig.add_subplot(211)
-fig = sm.graphics.tsa.plot_acf(dta.values.squeeze(), lags=300, ax=ax1)
+fig = sm.graphics.tsa.plot_acf(dta.values.squeeze(), lags=40, ax=ax1)
 ax2 = fig.add_subplot(212)
 fig = sm.graphics.tsa.plot_pacf(dta, lags=40, ax=ax2)
 
@@ -71,6 +77,8 @@ fig = plt.figure(figsize=(6,4))
 ax = fig.add_subplot(111)
 ax = arma_mod20.resid.plot(ax=ax);
 
+plt.show()
+
 # analyze residuals
 resid20 = arma_mod20.resid
 stats.normaltest(resid20)
@@ -100,4 +108,4 @@ ax = predict_sunspots20.plot(ax=ax, style='r--', label='Dynamic Prediction');
 ax.legend();
 ax.axis((-20.0, 38.0, -4.0, 200.0));
 
-plt.show()
+# plt.show()

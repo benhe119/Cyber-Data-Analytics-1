@@ -16,27 +16,29 @@ from statsmodels.tsa.arima_model import ARMA
 
 from statsmodels.graphics.api import qqplot
 
-def fitARMA(data,datetimefield,p=2,q=0):
+def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
+
+    data = dataframe[currentfield]
 
     # durbin watson stat
     print "Durbin Watson statistic: " + str(sm.stats.durbin_watson(data))
 
     # Plot autocorrelation and partial autocorrelation (using statsmodels)
-    lag = 100; # lag to plot
-    fig = plt.figure(figsize=(6,4))
-    ax1 = fig.add_subplot(211)
-    fig = sm.graphics.tsa.plot_acf(data.values.squeeze(), lags=lag, ax=ax1)
-    ax2 = fig.add_subplot(212)
-    fig = sm.graphics.tsa.plot_pacf(data, lags=lag, ax=ax2)
+    # lag = 100; # lag to plot
+    # fig = plt.figure(figsize=(6,4))
+    # ax1 = fig.add_subplot(211)
+    # fig = sm.graphics.tsa.plot_acf(data.values.squeeze(), lags=lag, ax=ax1)
+    # ax2 = fig.add_subplot(212)
+    # fig = sm.graphics.tsa.plot_pacf(data, lags=lag, ax=ax2)
     #plt.show()
 
     # Plot autocorrelation using pandas
-    data_2 = data
-    data_2 = (data_2 - data_2.mean()) / (data_2.std())
-    plt.acorr(data_2, maxlags = len(data_2) -1, linestyle = "solid", usevlines = False, marker='')
-    plt.title('autocorrelation plot using pandas')
-    #plt.show()
-    autocorrelation_plot(data)
+    # data_2 = data
+    # data_2 = (data_2 - data_2.mean()) / (data_2.std())
+    # plt.acorr(data_2, maxlags = len(data_2) -1, linestyle = "solid", usevlines = False, marker='')
+    # plt.title('autocorrelation plot using pandas')
+    # #plt.show()
+    # autocorrelation_plot(data)
     #plt.show()
 
     # fit arma models and print parameters
@@ -46,13 +48,13 @@ def fitARMA(data,datetimefield,p=2,q=0):
 
     # print model.start_params()
 
-    print 'Model Parameters: '
-    print model.params
-    #print model
+    # print 'Model Parameters: '
+    # print model.params
+    # print model
 
     # AIC
-    print '\nCriteria\n'
-    print model.aic
+    # print '\nCriteria\n'
+    # print model.aic
 
     # does out model obey the theory?
     print 'Durbin Watson (model residuals/errors): ' + str(sm.stats.durbin_watson(model.resid.values))
@@ -63,12 +65,22 @@ def fitARMA(data,datetimefield,p=2,q=0):
 
     # plot the data the model represents
     fig = plt.figure(figsize=(6,4))
-    ax = fig.add_subplot(111)
-    ax = model.resid.plot(ax=ax);
-    plt.title('ARMA model residuals')
+    ax = fig.add_subplot(211)
+    ax = model.resid.plot(ax=ax,label='Residuals');
+    ax = plt.title('ARMA model residuals')
+    resmat = model.resid
+    print resmat.describe()
+
+    #ax = plt.plot(resmat.index,dataframe['ATT_FLAG'],label='Attack')
+    ax2 = fig.add_subplot(212)
+
+    ax2 = dataframe['ATT_FLAG'].plot(ax=ax2,label='Attack')
+    ax2 = plt.title('Attack')
+
+    plt.legend()
     plt.xlabel('Date')
     plt.ylabel('Residual Error')
-    plt.show()
+    #plt.show()
 
 
     # model residuals
