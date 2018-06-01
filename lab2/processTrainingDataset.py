@@ -56,7 +56,25 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'N-gram'
+# should the familiarization plots be created?
+familiarizeData = True
+if familiarizeData:
+    # plot the different data to see which attack is which
+    #dta = df_train_2["L_T1"]
+    fieldname = "P_J269"
+
+    fig = plt.figure(figsize=(8,4))
+    ax1 = fig.add_subplot(211)
+    df_train_2[fieldname].plot(ax=ax1,figsize=(8,4))
+    plt.title(fieldname)
+    #plt.figure(1)
+    ax2 = fig.add_subplot(212, sharex=ax1)
+    df_train_2["ATT_FLAG"].plot(ax=ax2,figsize=(8,4))
+    plt.title('Actual Attack')
+    #ax2 = ax1.twinx()
+    plt.show()
+
+analysisMethod = 'N-gram' #ARMA, N-gram, PCA
 
 print 'Analysis method: ' + analysisMethod
 
@@ -79,10 +97,8 @@ if analysisMethod == 'ARMA':
 
     # only choose one field for the ARMA model
     # dta = df[["L_T1"]]
-
     # print durbin_watson statistic to choose ARMA model parameters (see tutorial)
     # print '\ndurbin watson statistics: ' + str(sm.stats.durbin_watson(dta))
-
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2015','2018'))
     # del df["DATETIME"]
     #
@@ -90,9 +106,6 @@ if analysisMethod == 'ARMA':
     # print currentDataset.index.max()
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2014','2015'))
     # datetimefield = currentDataset.index
-
-
-
     #print currentDataset.describe()
 
     for field in L_Txx: #["F_PU1"]: #["L_T1"]:
@@ -102,34 +115,47 @@ if analysisMethod == 'ARMA':
 
 
 elif analysisMethod == 'N-gram':
-    # filter data using FFT
+
+    # filter all L_Txx data using FFT
     filter(L_Txx,df_train_1)
 
-    datafieldname = 'L_T2'
+    i = 1;
 
-    # discretize data using SAX discretization
-    timestampsTrain1, discretizedTrain1Data = discretizeSAX(datafieldname,df_train_1)
-    timestampsTrain2, discretizedTrain2Data = discretizeSAX(datafieldname,df_train_2)
+    # field to consider
+    for datafieldname in L_Txx:
+        # datafieldname = 'L_T2'
 
-    # create n-gram from discretized data
-    anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 6, 0.002) #traindata, testdata, n-gram size, alert threshold
+        # discretize data using SAX discretization
+        timestampsTrain1, discretizedTrain1Data = discretizeSAX(datafieldname,df_train_1)
+        timestampsTrain2, discretizedTrain2Data = discretizeSAX(datafieldname,df_train_2)
 
-    # remove additional entries in timestampsTrain2
-    lengthAnomalyList = len(anomalyList)
-    lengthResultsList = len(timestampsTrain2)
+        # create n-gram from discretized data
+        anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
 
-    # remove last values in timestamp until it matches the anomaly list length
-    # this is because the discretization uses the data DIV n (of n-gram) and is
-    # therefore different in length
-    while (len(anomalyList) != len(timestampsTrain2)):
-        timestampsTrain2 = timestampsTrain2[:-1] # remove last entry
-        #print 'while loop entered'
+        # # show difference in length of data
+        # lengthAnomalyList = len(anomalyList)
+        # lengthResultsList = len(timestampsTrain2)
 
-    plt.figure()
-    plt.plot(timestampsTrain2,anomalyList,label='y filtered')
-    plt.title('Threshold breached for different')
+        # remove last values in timestamp until it matches the anomaly list length
+        # this is because the discretization uses the data DIV n (of n-gram) and is
+        # therefore different in length
+        while (len(anomalyList) != len(timestampsTrain2)):
+            timestampsTrain2 = timestampsTrain2[:-1] # remove last entry
+            #print 'while loop entered'
+
+
+        plt.figure(i)
+        plt.plot(timestampsTrain2,anomalyList,label='y filtered')
+        plt.title('Threshold breached for different')
+        #plt.show()
+
+        i = i+1
+
+    # plot the attacks
+    plt.figure(i+1)
+    df_train_2['ATT_FLAG'].plot(figsize=(8,4))
+    plt.title('Attacks')
     plt.show()
-
 
 
 elif analysisMethod == 'PCA':
