@@ -56,7 +56,7 @@ S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8"
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 Attack = ['ATT_FLAG']
 
-analysisMethod = 'N-gram'
+analysisMethod = 'PCA'
 
 print 'Analysis method: ' + analysisMethod
 
@@ -85,7 +85,7 @@ if analysisMethod == 'ARMA':
 
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2015','2018'))
     # del df["DATETIME"]
-
+    #
     # print currentDataset.index.min()
     # print currentDataset.index.max()
     # df.index = pd.Index(sm.tsa.datetools.dates_from_range('2014','2015'))
@@ -95,9 +95,9 @@ if analysisMethod == 'ARMA':
 
     #print currentDataset.describe()
 
-    # for field in ["F_PU1"]: #["L_T1"]:
-    #     fitARMA(currentDataset,field,datetimefield,p=2,q=0)
-    # plt.show()
+    for field in L_Txx: #["F_PU1"]: #["L_T1"]:
+        fitARMA(currentDataset,field,0,p=2,q=2)
+    plt.show()
 
 
 
@@ -110,7 +110,7 @@ elif analysisMethod == 'N-gram':
     discretizedTestData = discretizeSAX(L_Txx,df_train_2)
 
     # create n-gram from discretized data
-    N_gram(discretizedTrainData, discretizedTestData, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
+    N_gram(discretizedTrainData, discretizedTestData, 4, 0.002) #traindata, testdata, n-gram size, alert threshold
 
 
 
@@ -118,7 +118,7 @@ elif analysisMethod == 'N-gram':
 
 elif analysisMethod == 'PCA':
 	#PCA(df) #sub selection of data
-    PCA_detection(df_train_1)
+    PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
     print 'no analysis method...'

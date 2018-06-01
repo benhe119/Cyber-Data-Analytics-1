@@ -19,7 +19,7 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 			#create key string
 			currentGram = ''.join(gram)
 			key = previousGram+"-"+currentGram
-			
+
 
 			#check if the transition already existed
 			if key in states:
@@ -37,7 +37,7 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	#determine the odds
 	for key in states:
 		odds = states[key] / count
-		print odds
+		print key + "=>" + str(odds)
 		states[key] = states[key] / count
 
 	#now check the test data
@@ -53,7 +53,7 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 			#create key string
 			currentGram = ''.join(gram)
 			key = previousGram+"-"+currentGram
-			
+
 			#check the odds of this transition
 			if key not in states:
 				print "!Anomolie state change:"+key+" not seen in train set"

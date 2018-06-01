@@ -55,10 +55,10 @@ def PCA(csv):
 	return
 
 #PCA detection
-def PCA_detection(csv):
+def PCA_detection(csv,testset):
 
 	#delete the flag column
-	del csv['ATT_FLAG']
+	#del csv['ATT_FLAG']
 
 	#scale
 	scaler = StandardScaler()
@@ -66,7 +66,7 @@ def PCA_detection(csv):
 	#print training_normalized
 	#print training_normalized.shape
 
-	pca = decomposition.PCA(n_components=20)	#we can use 11 components for modeling, and 9 for anomalous subspace
+	pca = decomposition.PCA(n_components=42)	#we can use 11 components for modeling, and 9 for anomalous subspace
 	pca.fit(training_normalized)
 	pca_model = pca.transform(training_normalized)
 
@@ -75,6 +75,7 @@ def PCA_detection(csv):
 
 	#load and process the test_dataset
 	test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
+	test_dataset = testset
 
 	print test_dataset
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
@@ -94,7 +95,7 @@ def PCA_detection(csv):
 	C = np.dot(P, P_T)
 
 	# Identity Matrix with dimensions 43 X 43
-	I = np.identity(43)
+	I = np.identity(44)
 
 	# y_residual is the projection of test data on anomalous subspace
 	y_residual = np.zeros((test_normalized.shape))
@@ -121,6 +122,8 @@ def PCA_detection(csv):
 
 	test_dataset = test_dataset.assign(ResidualVector=spe)
 	test_dataset['ResidualVector'].plot(figsize=(15,5))
+	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*500
+	test_dataset['ATT_FLAG'].plot(figsize=(15,5))
 	plt.show()
 
 	return
