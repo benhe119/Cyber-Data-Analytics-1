@@ -21,7 +21,7 @@ def PCA(csv):
 	#print training_normalized.shape
 
 	#create PCA model
-	pca = decomposition.PCA(n_components=2) #components can be changed
+	pca = decomposition.PCA() #components can be changed
 	pca.fit(training_normalized)
 	pca_model = pca.transform(training_normalized)
 
@@ -36,16 +36,16 @@ def PCA(csv):
 
 	#plot variance
 	x_axis = np.arange(1, (len(pca.explained_variance_ratio_) + 1), 1)
-	plt.xlabel('Principal Component')
-	plt.ylabel('Variance Captured')
-	plt.plot(x_axis, pca.explained_variance_ratio_)
+	#plt.xlabel('Principal Component')
+	#plt.ylabel('Variance Captured')
+	#plt.plot(x_axis, pca.explained_variance_ratio_)
 	#plt.show()
 
 	#plot cumulative variance
 	plt.xlabel('Principal Components')
 	plt.ylabel('Cumulative Variance Captured')
 	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
-	#plt.show()
+	plt.show()
 
 	#plot one column
 	csv = csv.assign(PC1=pca_model[:,0])
@@ -66,7 +66,7 @@ def PCA_detection(csv,testset):
 	#print training_normalized
 	#print training_normalized.shape
 
-	pca = decomposition.PCA(n_components=42)	#we can use 11 components for modeling, and 9 for anomalous subspace
+	pca = decomposition.PCA()
 	pca.fit(training_normalized)
 	pca_model = pca.transform(training_normalized)
 
@@ -74,12 +74,11 @@ def PCA_detection(csv,testset):
 	pca.explained_variance_ratio_.cumsum()
 
 	#load and process the test_dataset
-	test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
+	#test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
 	test_dataset = testset
 
-	print test_dataset
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
-	# labels =  test_dataset['ATT_FLAG']
+	labels =  test_dataset['ATT_FLAG']
 	# del test_dataset['ATT_FLAG']
 
 
@@ -90,7 +89,7 @@ def PCA_detection(csv,testset):
 	eigenvectors = pca.components_
 
 	# Matrix P represents principal components corresponding to normal subspace
-	P = np.transpose(eigenvectors[:-9])
+	P = np.transpose(eigenvectors[:11])
 	P_T = np.transpose(P)
 	C = np.dot(P, P_T)
 
@@ -126,22 +125,25 @@ def PCA_detection(csv,testset):
 	test_dataset['ATT_FLAG'].plot(figsize=(15,5))
 	plt.show()
 
-	return
 
 	# compute confusion matrix (this isn't working as it should..)
+
 	tp = 0
 	fp = 0
 	tn = 0
 	fn = 0
 	for i in range(test_normalized.shape[0]):
+
 	    if(labels[i] == 1 and na[i] == 1):
 	        tp = tp + 1
 	    if(labels[i] == 0 and na[i] == 1):
 	        fp = fp + 1
-	    if(labels[i] == 0 and na[i] == 0):
-	        fn = fn + 1
 	    if(labels[i] == 1 and na[i] == 0):
+	        fn = fn + 1
+	    if(labels[i] == 0 and na[i] == 0):
 	        tn = tn + 1
+
+
 	print "TP: {} ".format(tp)
 	print "FP: {} ".format(fp)
 	print "FN: {} ".format(fn)
