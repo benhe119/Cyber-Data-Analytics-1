@@ -27,6 +27,7 @@ from ARMA import fitARMA
 from PCA import PCA, PCA_detection
 from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
+from applyARMA import getBinaryDF, obtainFinalPrediction
 
 ### READ AND EDIT CSV FILE ###   ###############################################
 
@@ -58,28 +59,41 @@ P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 
 Attack = ['ATT_FLAG']
 
 # should the familiarization plots be created?
-familiarizeData = True
+familiarizeData = False
 if familiarizeData:
 
     dataSet = df_train_2
     # plot the different data to see which attack is which
     #dta = df_train_2["L_T1"]
-    fieldname = "L_T1"
+
+    #for pumpno in np.arange(1,11,1):
+    pumpno = 2
+    fieldname1 = "F_PU" + str(pumpno)
+    fieldname2 = "S_PU" + str(pumpno)
+
+    # fieldname1 = "P_J14"
+    # fieldname2 = "P_J422"
 
     fig = plt.figure(figsize=(8,4))
-    ax1 = fig.add_subplot(211)
-    dataSet[fieldname].plot(ax=ax1,figsize=(8,4))
-    plt.title(fieldname)
+    ax1 = fig.add_subplot(311)
+    dataSet[fieldname1].plot(ax=ax1,figsize=(8,8))
+    plt.title(fieldname1)
     plt.grid()
-    #plt.figure(1)
-    ax2 = fig.add_subplot(212, sharex=ax1)
-    dataSet["ATT_FLAG"].plot(ax=ax2,figsize=(8,4))
-    plt.title('Actual Attack')
+
+    ax2 = fig.add_subplot(312, sharex=ax1)
+    dataSet[fieldname2].plot(ax=ax2,figsize=(8,8))
+    plt.title(fieldname2)
+    plt.grid()
+
+    ax3 = fig.add_subplot(313, sharex=ax1)
+    dataSet["ATT_FLAG"].plot(ax=ax3,figsize=(8,8))
+    plt.title('Attack')
     #ax2 = ax1.twinx()
     plt.grid()
+
     plt.show()
 
-analysisMethod = 'NONE' #ARMA, N-gram, PCA
+analysisMethod = 'ARMA' #ARMA, N-gram, PCA
 
 print 'Analysis method: ' + analysisMethod
 
@@ -97,8 +111,8 @@ if analysisMethod == 'ARMA':
     currentDataset = df_train_2
 
     # filter data
-    for field in ["F_PU1"]: #["L_T1"]: # L_Txx list
-        filter([field],currentDataset)
+    # for field in []: #["L_T1"]: # L_Txx list
+    #     filter([field],currentDataset)
 
     # only choose one field for the ARMA model
     # dta = df[["L_T1"]]
@@ -113,10 +127,13 @@ if analysisMethod == 'ARMA':
     # datetimefield = currentDataset.index
     #print currentDataset.describe()
 
-    for field in ['P_J269']: #L_Txx: #["F_PU1"]: #["L_T1"]:
-        fitARMA(currentDataset,field,0,p=4,q=2)
-    plt.show()
+    binaryDF = getBinaryDF(currentDataset)
 
+    # for field in ['F_PU6']: #L_Txx: #["F_PU1"]: #["L_T1"]:
+    #     fitARMA(currentDataset,field,0,p=2,q=2)
+    # plt.show()
+
+    obtainFinalPrediction(binaryDF)
 
 
 elif analysisMethod == 'N-gram':

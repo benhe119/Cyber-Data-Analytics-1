@@ -16,12 +16,16 @@ from statsmodels.tsa.arima_model import ARMA
 
 from statsmodels.graphics.api import qqplot
 
-def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
+def fitARMA(dataframe,currentfield,p=2,q=0):
+
+    print '\nFitting ARMA to: '
+    print currentfield
+    print ''
 
     data = dataframe[currentfield]
 
     # durbin watson stat
-    print "Durbin Watson statistic: " + str(sm.stats.durbin_watson(data))
+    # print "Durbin Watson statistic: " + str(sm.stats.durbin_watson(data))
 
     # Plot autocorrelation and partial autocorrelation (using statsmodels)
     # lag = 100; # lag to plot
@@ -31,7 +35,6 @@ def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
     # ax2 = fig.add_subplot(212)
     # fig = sm.graphics.tsa.plot_pacf(data, lags=lag, ax=ax2)
     #plt.show()
-
     # Plot autocorrelation using pandas
     # data_2 = data
     # data_2 = (data_2 - data_2.mean()) / (data_2.std())
@@ -42,40 +45,62 @@ def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
     #plt.show()
 
     # fit arma models and print parameters
-    model = sm.tsa.ARMA(data, order=(p,q)).fit()
+    model = sm.tsa.ARMA(data, order=(p,q)).fit(disp=0)
 
     # model = ARMA(data, (2,0))
-
     # print model.start_params()
-
     # print 'Model Parameters: '
     # print model.params
     # print model
-
     # AIC
     # print '\nCriteria\n'
     # print model.aic
 
     # does out model obey the theory?
-    print 'Durbin Watson (model residuals/errors): ' + str(sm.stats.durbin_watson(model.resid.values))
+    # print 'Durbin Watson (model residuals/errors): ' + str(sm.stats.durbin_watson(model.resid.values))
 
     # no dependency on lags, quite centered (don't need ARIMA, only ARMA or AR)
     # autocorrelation_plot(dta)
     # plt.show()
 
     # plot the data the model represents
-    fig = plt.figure(figsize=(6,4))
-    ax1 = fig.add_subplot(211)
-    ax1 = model.resid.plot(ax=ax1,label='Residuals');
-    ax1 = plt.title('ARMA model residuals')
-    resmat = model.resid
-    print resmat.describe()
 
-    #ax = plt.plot(resmat.index,dataframe['ATT_FLAG'],label='Attack')
-    ax2 = fig.add_subplot(212)#, sharex = ax1)#, sharex=ax1)
+    dfResiduals = model.resid
+    # print resmat.describe()
 
-    ax2 = dataframe['ATT_FLAG'].plot(ax=ax2,label='Attack')
-    ax2 = plt.title('Attack')
+    # print 'residuals'
+    # print dfResiduals.describe()
+    # print '\n -------------- \n '
+
+    def applyThreshold(dfInput, threshold):
+        #dfOutput = dfInput
+        dfOutput = (np.abs(dfInput) > threshold).astype(int)
+        # dfInput.loc[np.abs(dfInput[0]) > threshold, 'boolean'] = True
+        return dfOutput
+
+    dfBinary = applyThreshold(dfResiduals, 0.8)
+    # print 'dfBinary description: '
+    # print dfBinary.describe()
+
+
+    shouldPlot = False
+
+    if shouldPlot:
+        fig = plt.figure(figsize=(6,4))
+        ax1 = fig.add_subplot(311)
+        ax1 = model.resid.plot(ax=ax1,label='Residuals');
+        ax1 = plt.title('ARMA model residuals')
+
+        #ax = plt.plot(resmat.index,dataframe['ATT_FLAG'],label='Attack')
+        ax2 = fig.add_subplot(312)#, sharex = ax1)#, sharex=ax1)
+
+        ax2 = dataframe['ATT_FLAG'].plot(ax=ax2,label='Attack')
+        ax2 = plt.title('Attack')
+
+        ax3 = fig.add_subplot(313)#, sharex = ax1)#, sharex=ax1)
+
+        ax3 = dfBinary.plot(ax=ax3,label='Binary')
+        ax3 = plt.title('Binary')
 
     # plt.legend()
     # plt.xlabel('Date')
@@ -164,6 +189,8 @@ def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
 #
 # print "MFE = ", mean_forecast_err(dta.SUNACTIVITY, predict_sunspots30)
 # print "MAE = ", mean_absolute_err(dta.SUNACTIVITY, predict_sunspots30)
+
+    return dfBinary
 
 
 def fitAR():
