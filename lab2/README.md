@@ -16,3 +16,14 @@ Group 60 - Ernst Mulders and Alex Berndt
 - cd Group60Lab2/lab2/
 - pip install -r requirements.txt
 - python2 processTrainingDataset.py
+
+The **main** file is ***processTrainingDataset.py***
+
+### Analysis Methods ###
+
+Anomaly detection is done by using different methods:
+- **ARMA** time series predicition
+- **N-gram** using SAX discretization and Markov chains
+- Principle Components Analysis (**PCA**)
+
+In ***processTrainingDataset.py***, change *analysisMethod* (line 82) to try the different methods

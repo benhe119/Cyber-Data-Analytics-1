@@ -64,7 +64,7 @@ if familiarizeData:
     dataSet = df_train_2
     # plot the different data to see which attack is which
     #dta = df_train_2["L_T1"]
-    fieldname = "P_J306"
+    fieldname = "L_T1"
 
     fig = plt.figure(figsize=(8,4))
     ax1 = fig.add_subplot(211)
