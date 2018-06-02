@@ -65,21 +65,21 @@ def fitARMA(dataframe,currentfield,datetimefield,p=2,q=0):
 
     # plot the data the model represents
     fig = plt.figure(figsize=(6,4))
-    ax = fig.add_subplot(211)
-    ax = model.resid.plot(ax=ax,label='Residuals');
-    ax = plt.title('ARMA model residuals')
+    ax1 = fig.add_subplot(211)
+    ax1 = model.resid.plot(ax=ax1,label='Residuals');
+    ax1 = plt.title('ARMA model residuals')
     resmat = model.resid
     print resmat.describe()
 
     #ax = plt.plot(resmat.index,dataframe['ATT_FLAG'],label='Attack')
-    ax2 = fig.add_subplot(212)
+    ax2 = fig.add_subplot(212)#, sharex = ax1)#, sharex=ax1)
 
     ax2 = dataframe['ATT_FLAG'].plot(ax=ax2,label='Attack')
     ax2 = plt.title('Attack')
 
-    plt.legend()
-    plt.xlabel('Date')
-    plt.ylabel('Residual Error')
+    # plt.legend()
+    # plt.xlabel('Date')
+    # plt.ylabel('Residual Error')
     #plt.show()
 
 
