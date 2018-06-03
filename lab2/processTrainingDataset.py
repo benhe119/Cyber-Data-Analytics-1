@@ -56,6 +56,8 @@ F_PUxx = ["F_PU1", "F_PU2", "F_PU3", "F_PU4", "F_PU5", "F_PU6", "F_PU7", "F_PU8"
 S_PUxx = ["S_PU1", "S_PU2", "S_PU3", "S_PU4", "S_PU5", "S_PU6", "S_PU7", "S_PU8", "S_PU9", "S_PU10", "S_PU11"]
 V_Pxx = ["F_V2", "S_V2"]
 P_Jxxx = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
+All = L_Txx + F_PUxx + S_PUxx + V_Pxx + P_Jxxx
+
 Attack = ['ATT_FLAG']
 
 # should the familiarization plots be created?
@@ -93,7 +95,7 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'ARMA' #ARMA, N-gram, PCA
+analysisMethod = 'N-gram' #ARMA, N-gram, PCA
 
 print 'Analysis method: ' + analysisMethod
 
@@ -139,12 +141,14 @@ if analysisMethod == 'ARMA':
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
-    filter(L_Txx,df_train_1)
+    filter(All,df_train_1)
 
     i = 1;
 
+    all_anomalies = []
+
     # field to consider
-    for datafieldname in L_Txx:
+    for datafieldname in All:
         # datafieldname = 'L_T2'
 
         # discretize data using SAX discretization
@@ -152,7 +156,7 @@ elif analysisMethod == 'N-gram':
         timestampsTrain2, discretizedTrain2Data = discretizeSAX(datafieldname,df_train_2)
 
         # create n-gram from discretized data
-        anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 2, 0.002) #traindata, testdata, n-gram size, alert threshold
+        anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 4, 0.0008) #traindata, testdata, n-gram size, alert threshold
 
         # # show difference in length of data
         # lengthAnomalyList = len(anomalyList)
@@ -165,13 +169,20 @@ elif analysisMethod == 'N-gram':
             timestampsTrain2 = timestampsTrain2[:-1] # remove last entry
             #print 'while loop entered'
 
+        all_anomalies.append(anomalyList)
 
-        plt.figure(i)
-        plt.plot(timestampsTrain2,anomalyList,label='y filtered')
-        plt.title('Threshold breached for different')
+        #plt.figure(i)
+        #plt.plot(timestampsTrain2,anomalyList,label='y filtered')
+        #plt.title('Threshold breached for different')
         #plt.show()
 
         i = i+1
+
+    combined_anomalies = [sum(x) for x in zip(*all_anomalies)]
+
+    plt.figure(i)
+    plt.plot(timestampsTrain2,combined_anomalies,label='y filtered')
+    plt.title('Threshold breached for all')
 
     # plot the attacks
     plt.figure(i+1)
@@ -181,7 +192,7 @@ elif analysisMethod == 'N-gram':
 
 
 elif analysisMethod == 'PCA':
-	#PCA(df) #sub selection of data
+	#PCA(df_train_1) #sub selection of data
     PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
