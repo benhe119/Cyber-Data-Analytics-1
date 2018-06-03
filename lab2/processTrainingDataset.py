@@ -141,14 +141,14 @@ if analysisMethod == 'ARMA':
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
-    filter(All,df_train_1)
+    filter(S_PUxx,df_train_1)
 
     i = 1;
 
     all_anomalies = []
 
     # field to consider
-    for datafieldname in All:
+    for datafieldname in S_PUxx:
         # datafieldname = 'L_T2'
 
         # discretize data using SAX discretization
@@ -156,7 +156,7 @@ elif analysisMethod == 'N-gram':
         timestampsTrain2, discretizedTrain2Data = discretizeSAX(datafieldname,df_train_2)
 
         # create n-gram from discretized data
-        anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 4, 0.0008) #traindata, testdata, n-gram size, alert threshold
+        anomalyList = N_gram(discretizedTrain1Data, discretizedTrain2Data, 2, 0.001) #traindata, testdata, n-gram size, alert threshold
 
         # # show difference in length of data
         # lengthAnomalyList = len(anomalyList)
