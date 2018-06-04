@@ -46,23 +46,23 @@ def getBinaryDF(inputDF):
 
     # Apply binary selection to Tank Levels
     for fieldname in L_Tselect:
-        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2)
+        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8) # 2
 
     # Apply binary selection to Pump Flow Rate
     for fieldname in F_PUselect:
-        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2)
+        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to Pump Switch Signals
     for fieldname in S_PUselect:
-        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2)
+        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to Valve
     for fieldname in V_Pselect:
-        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2)
+        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to PLC Signals
     for fieldname in P_Jselect:
-        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2)
+        binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     print '\n binary'
     print binaryDF.describe()
@@ -72,6 +72,7 @@ def getBinaryDF(inputDF):
 def obtainFinalPrediction(binaryDF):
 
     # Create an empty dataframe which will store the predictions
+    dfActualAttack = binaryDF["ATT_FLAG"].copy(deep=True)
     dfPrediction = binaryDF["ATT_FLAG"].copy(deep=True)
 
     # set all values to zero for dfPrediction
@@ -79,23 +80,25 @@ def obtainFinalPrediction(binaryDF):
 
     print '\ndf prediction ...\n'
 
-    # Check for scenario 1
-    dfPrediction.loc[binaryDF["L_T1"] == 1] = 1
+    # Check for scenario 1 (attack 2) (anomaly in L_T1, P_J269)(binaryDF["L_T1"] == 1) &
+    dfPrediction.loc[((binaryDF["L_T1"] == 1) & (binaryDF["P_J269"] == 1) & (binaryDF["F_V2"] == 1) & (binaryDF["F_PU8"] == 1) & (binaryDF["P_J306"] == 1))] = 1#0.1
+
+    dfPrediction.loc[binaryDF["L_T1"] == 1] = 1#0.7
 
     # Check for scenario 2
+    dfPrediction.loc[binaryDF["S_PU11"] == 1] = 1#0.2
 
+    # Check for attack 3
+    #dfPrediction.loc[((binaryDF["F_V2"] == 1) & (binaryDF["F_PU8"] == 1) & (binaryDF["F_PU10"] == 1) & (binaryDF["P_J306"] == 1))] = 0.3
 
-    # Check for scenario 3
+    # Check for attack 4
+    dfPrediction.loc[((binaryDF["S_PU6"] == 1) & (binaryDF["F_PU6"] == 1) & (binaryDF["S_PU7"] == 1) & (binaryDF["F_PU7"] == 1))] = 1#0.4
 
+    # Check for scenario 5 (attack 1) (binaryDF["S_PU11"] == 1) &
+    #dfPrediction.loc[(binaryDF["L_T7"] == 1)] = 0.5
 
-    # Check for scenario 4
-
-
-    # Check for scenario 5
-    dfPrediction.loc[binaryDF["S_PU11"] == 1] = 1
-
-    # Check for scenario 6
-
+    # Check for attack 5
+    dfPrediction.loc[((binaryDF["S_PU6"] == 1) & (binaryDF["F_PU6"] == 1) & (binaryDF["F_PU7"] == 1))] = 1#0.6
 
     # Print Performance to console
     # tp = 0
@@ -116,13 +119,27 @@ def obtainFinalPrediction(binaryDF):
 	# print "FN: {} ".format(fn)
 	# print "TN: {} ".format(tn)
 
+    # DETERMINE PERFORMANCE METRICS
+    PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+    print 'Total positive values: ' + str(PositiveTotal)
+
+    print dfPrediction.shape
+    print binaryDF.shape
+
+    TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
+    print 'Total predicted positives: ' + str(TPtotal)
+    TPR = float(TPtotal)/PositiveTotal
+    print 'TPR: ' + str(TPR)
+
+
     # plot the prediction vs actual values
     fig = plt.figure(figsize=(8,4))
     ax1 = fig.add_subplot(111)
 
+    ax1 = dfPrediction.plot(ax=ax1,label='prediction')
     ax1 = binaryDF["ATT_FLAG"].plot(ax=ax1,label='actual')
-    ax1 = dfPrediction.plot(ax=ax1,label='prediction');
     ax1 = plt.title('Actual vs Predicted Attack using ARMA')
+    plt.ylabel('Attack Bool')
     plt.legend()
     plt.grid()
     plt.show()

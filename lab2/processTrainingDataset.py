@@ -135,7 +135,6 @@ if analysisMethod == 'ARMA':
 
     obtainFinalPrediction(binaryDF)
 
-
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
@@ -144,7 +143,7 @@ elif analysisMethod == 'N-gram':
     i = 1;
 
     # field to consider
-    for datafieldname in L_Txx:
+    for datafieldname in ['L_T2']: # L_Txx
         # datafieldname = 'L_T2'
 
         # discretize data using SAX discretization
@@ -179,10 +178,10 @@ elif analysisMethod == 'N-gram':
     plt.title('Attacks')
     plt.show()
 
-
 elif analysisMethod == 'PCA':
 	#PCA(df) #sub selection of data
     PCA_detection(df_train_1,df_train_2)
+
 else:
     # do nothing
     print 'no analysis method...'
