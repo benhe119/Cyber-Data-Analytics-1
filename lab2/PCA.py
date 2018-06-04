@@ -43,14 +43,14 @@ def VisualizeComponentsPCA(trainDF):
 	#plt.show()
 
 	#plot cumulative variance
-	plt.figure(20,figsize=(6,2.5))
-
-	plt.title('Cumulative Variance of Principal Components')
-	plt.xlabel('Principal Components')
-	plt.ylabel('Cumulative Variance Captured')
-	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
-	plt.grid()
-	plt.tight_layout()
+	# plt.figure(20,figsize=(6,2.5))
+	#
+	# plt.title('Cumulative Variance of Principal Components')
+	# plt.xlabel('Principal Components')
+	# plt.ylabel('Cumulative Variance Captured')
+	# plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
+	# plt.grid()
+	# plt.tight_layout()
 	#plt.show()
 
 	print trainDF.describe()
@@ -96,6 +96,7 @@ def VisualizeComponentsPCA(trainDF):
 		plt.xlabel(xlabel)
 		plt.ylabel(ylabel)
 		plt.grid()
+		plt.savefig('pc3_component.eps',div=300,format='eps')
 		# plt.show();
 
 		#plot component 6 or 7 (which are irregular)
@@ -105,6 +106,7 @@ def VisualizeComponentsPCA(trainDF):
 		plt.xlabel(xlabel)
 		plt.ylabel(ylabel)
 		plt.grid()
+		plt.savefig('pc4_component.eps',div=300,format='eps')
 		# plt.show();
 
 		plt.figure(5)
@@ -114,6 +116,7 @@ def VisualizeComponentsPCA(trainDF):
 		plt.xlabel(xlabel)
 		plt.ylabel(ylabel)
 		plt.grid()
+		plt.savefig('pc5_component.eps',div=300,format='eps')
 		# plt.show();
 
 		#plot component 6 or 7 (which are irregular)
@@ -264,12 +267,14 @@ def VisualizeComponentsPCA(trainDF):
 
 
 	plt.figure(14)
-
 	dfPrediction.plot(figsize=(sizeX,sizeY),label='Detected Attacks')
 	labels.plot(figsize=(sizeX,sizeY),label='Actual Attack')
 	plt.title('PCA Detection of Attacks')
 	plt.legend()
 	plt.grid()
+	plt.ylabel('Attack Bool')
+	plt.tight_layout()
+	plt.savefig('pca_results.eps',div=300,format='eps')
 	plt.show()
 
 

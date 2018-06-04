@@ -197,8 +197,11 @@ else:
 
 if ensembleMethod == 'Method1':
     print '\nEnsemble method 1'
-elif ensembleMethod == 'Method2':
-    print '\nEnsemble method 2'
+
+    # use ARMA and PCA
+
+    
+
 else:
     # do nothing
     print '\nno ensemble method analysis...'
