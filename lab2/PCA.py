@@ -86,9 +86,9 @@ def PCA_detection(csv,testset):
 	#test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
 	test_dataset = testset
 
-	print testset.describe()
+	#print testset.describe()
 
-	print testset.index
+	#print testset.index
 
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
 	labels =  test_dataset['ATT_FLAG']
@@ -124,6 +124,7 @@ def PCA_detection(csv,testset):
 
 	# na will be set to 1 if the spe is greater than the threshold
 	na = np.zeros((test_normalized.shape[0]))
+	predicted_attacks_array = np.zeros((test_normalized.shape[0]))
 	threshold = 500
 	for i in range(test_normalized.shape[0]):
 	    spe[i] = np.square(np.sum(np.subtract(y_residual[i], test_normalized[i])))
@@ -131,24 +132,58 @@ def PCA_detection(csv,testset):
 	    # if spe is greater than threshold then classify as attack by setting na to 1
 	    if(spe[i] > threshold):
 	        na[i] = 1
+			#predicted_attacks_array[i] = 1
 
+	predicted_attacks = pd.DataFrame(na,index=test_dataset.index,columns=['Prediction'])
+
+	#print predicted_attacks.describe()
 
 	# set detection Threshold
 	threshold = 500;
 
 	test_dataset = test_dataset.assign(ResidualVector=spe)
-	test_dataset['ResidualVector'].plot(figsize=(9,3))
-	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*500
-	test_dataset['ATT_FLAG'].plot()
+	test_dataset['ResidualVector'] = test_dataset['ResidualVector']*0.0005
+	test_dataset['ResidualVector'].plot(figsize=(9,3),label='Residual Error')
+	predicted_attacks['Prediction'].plot(label='PCA-based Prediction')
+	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*1
+	test_dataset['ATT_FLAG'].plot(label='Actual Attack')
 	#plt.plot([test_dataset['DatatimeIndex'].iloc[0], [test_dataset['DatatimeIndex'].iloc[-1]] ], [threshold, threshold],'k--')
 	#plt.plot([test_dataset.index[0], test_dataset.index[-1] ], [threshold, threshold],'k--')
 	#plt.plot(['2016-07-04 00:00:00', '2016-12-25 00:00:00' ], [threshold, threshold],'k--')
-
+	plt.grid()
+	plt.legend()
 	plt.show()
 
 
+	# DETERMINE PERFORMANCE METRICS
+	print '\nPERFORMANCE METRICS\n'
+
+	dfActualAttack = test_dataset['ATT_FLAG']
+	dfPrediction = predicted_attacks['Prediction']
+    # True Positive Rate aka Recall
+	PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+	totalpoints = dfActualAttack.sum()
+	print 'Total datapoints: ' + str(totalpoints)
+	print 'Total positive values: ' + str(PositiveTotal)
+
+    # print dfPrediction.shape
+    # print binaryDF.shape
+
+	TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
+	print 'Total predicted positives: ' + str(TPtotal)
+	TPR = float(TPtotal)/float(PositiveTotal)
+	print 'TPR: ' + str(TPR)
+	Recall = TPR
+	print 'Recall: ' + str(Recall)
+
+    # Precision
+	FPtotal = dfPrediction[((dfActualAttack == 0) & (dfPrediction == 1))].sum()
+	Precision = float(TPtotal)/float(TPtotal + FPtotal)
+	print 'Precision: ' + str(Precision)
+
 	# compute confusion matrix (this isn't working as it should..)
 
+	print '\n'
 	tp = 0
 	fp = 0
 	tn = 0

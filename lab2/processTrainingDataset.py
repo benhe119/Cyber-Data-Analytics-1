@@ -95,7 +95,7 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'ARMA' #ARMA, N-gram, PCA
+analysisMethod = 'PCA' #ARMA, N-gram, PCA
 ensembleMethod = 'Method1' # Method2 or None
 
 print 'Analysis method: ' + analysisMethod
@@ -137,7 +137,6 @@ if analysisMethod == 'ARMA':
     # plt.show()
 
     obtainFinalPrediction(binaryDF)
-
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
@@ -189,11 +188,9 @@ elif analysisMethod == 'N-gram':
     df_train_2['ATT_FLAG'].plot(figsize=(8,4))
     plt.title('Attacks')
     plt.show()
-
 elif analysisMethod == 'PCA':
 	#PCA(df_train_1) #sub selection of data
     PCA_detection(df_train_1,df_train_2)
-
 else:
     # do nothing
     print 'no analysis method...'
@@ -205,7 +202,6 @@ elif ensembleMethod == 'Method2':
 else:
     # do nothing
     print '\nno ensemble method analysis...'
-
 
 print '\nDone!'
 
