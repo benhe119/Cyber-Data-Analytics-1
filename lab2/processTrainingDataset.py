@@ -24,7 +24,7 @@ from filter_data import filter, filter_F_PUxx, filter_S_PUxx, filter_P_Jxxx
 from discretize_data import discretizeBinary, discretizeSAX
 
 from ARMA import fitARMA
-from PCA import PCA, PCA_detection
+from PCA import VisualizeComponentsPCA, PCA_detection
 from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
 from applyARMA import getBinaryDF, obtainFinalPrediction
@@ -189,8 +189,8 @@ elif analysisMethod == 'N-gram':
     plt.title('Attacks')
     plt.show()
 elif analysisMethod == 'PCA':
-	#PCA(df_train_1) #sub selection of data
-    PCA_detection(df_train_1,df_train_2)
+	VisualizeComponentsPCA(df_train_2) #sub selection of data
+    # PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
     print 'no analysis method...'
