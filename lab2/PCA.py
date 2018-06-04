@@ -41,9 +41,14 @@ def PCA(csv):
 	#plt.show()
 
 	#plot cumulative variance
+	plt.figure(1,figsize=(6,2.5))
+
+	plt.title('Cumulative Variance of Principal Components')
 	plt.xlabel('Principal Components')
 	plt.ylabel('Cumulative Variance Captured')
 	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
+	plt.grid()
+	plt.tight_layout()
 	plt.show()
 
 	#plot component 5 (for comparison to show the normal behaviour)
@@ -80,6 +85,10 @@ def PCA_detection(csv,testset):
 	#load and process the test_dataset
 	#test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
 	test_dataset = testset
+
+	print testset.describe()
+
+	print testset.index
 
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
 	labels =  test_dataset['ATT_FLAG']
@@ -123,10 +132,18 @@ def PCA_detection(csv,testset):
 	    if(spe[i] > threshold):
 	        na[i] = 1
 
+
+	# set detection Threshold
+	threshold = 500;
+
 	test_dataset = test_dataset.assign(ResidualVector=spe)
-	test_dataset['ResidualVector'].plot(figsize=(15,5))
+	test_dataset['ResidualVector'].plot(figsize=(9,3))
 	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*500
-	test_dataset['ATT_FLAG'].plot(figsize=(15,5))
+	test_dataset['ATT_FLAG'].plot()
+	#plt.plot([test_dataset['DatatimeIndex'].iloc[0], [test_dataset['DatatimeIndex'].iloc[-1]] ], [threshold, threshold],'k--')
+	#plt.plot([test_dataset.index[0], test_dataset.index[-1] ], [threshold, threshold],'k--')
+	#plt.plot(['2016-07-04 00:00:00', '2016-12-25 00:00:00' ], [threshold, threshold],'k--')
+
 	plt.show()
 
 

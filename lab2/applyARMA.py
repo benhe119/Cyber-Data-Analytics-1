@@ -31,43 +31,54 @@ S_PUselect = ["S_PU2", "S_PU6", "S_PU7", "S_PU8", "S_PU10", "S_PU11"]
 V_Pselect = ["F_V2", "S_V2"]
 P_Jselect = ['P_J280', 'P_J269', 'P_J300', 'P_J256', 'P_J289', 'P_J415', 'P_J302', 'P_J306', 'P_J307', 'P_J317', 'P_J14', 'P_J422']
 
+# list of uninteresting fields we are not interested in for analysis
 listToDelete = ["L_T6", "S_PU1","S_PU3","S_PU4","S_PU5","S_PU9","F_PU3","F_PU4","F_PU5","F_PU9"]
 
 def getBinaryDF(inputDF):
 
     binaryDF = inputDF.copy(deep=True)
 
-    print 'input'
-    print inputDF.describe()
+    print 'Applying ARMA models and thresholds'
+    #print inputDF.describe()
 
     # Remove signals that do not contain exciting information
     for deletefield in listToDelete:
         del binaryDF[deletefield]
 
     # Apply binary selection to Tank Levels
+    print ' - L_Txx : tank level'
     for fieldname in L_Tselect:
         binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8) # 2
 
     # Apply binary selection to Pump Flow Rate
+    print ' - F_PUxx : pump flow rate'
     for fieldname in F_PUselect:
         binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to Pump Switch Signals
+    print ' - S_PUxx : pump switch'
     for fieldname in S_PUselect:
         binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to Valve
+    print ' - V_Pxx : valve'
     for fieldname in V_Pselect:
         binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
     # Apply binary selection to PLC Signals
+    print ' - P_Jxxx : PLC signal'
     for fieldname in P_Jselect:
         binaryDF[fieldname] = fitARMA(inputDF,fieldname,p=2,q=2,threshold=0.8)
 
-    print '\n binary'
-    print binaryDF.describe()
+
+    # print '\n binary'
+    # print binaryDF.describe()
+
+    print ' - Created database of thresholds for each signal...'
+    print ' - Done'
 
     return binaryDF
+
 
 def obtainFinalPrediction(binaryDF):
 
@@ -78,27 +89,33 @@ def obtainFinalPrediction(binaryDF):
     # set all values to zero for dfPrediction
     dfPrediction = (dfPrediction > 2).astype(int)
 
-    print '\ndf prediction ...\n'
+    print 'applying scenario-based detection...'
 
     # Check for scenario 1 (attack 2) (anomaly in L_T1, P_J269)(binaryDF["L_T1"] == 1) &
+    print ' - scenario 1'
     dfPrediction.loc[((binaryDF["L_T1"] == 1) & (binaryDF["P_J269"] == 1) & (binaryDF["F_V2"] == 1) & (binaryDF["F_PU8"] == 1) & (binaryDF["P_J306"] == 1))] = 1#0.1
-
+    print ' - scenario 2'
     dfPrediction.loc[binaryDF["L_T1"] == 1] = 1#0.7
 
     # Check for scenario 2
+    print ' - scenario 3'
     dfPrediction.loc[binaryDF["S_PU11"] == 1] = 1#0.2
 
     # Check for attack 3
     #dfPrediction.loc[((binaryDF["F_V2"] == 1) & (binaryDF["F_PU8"] == 1) & (binaryDF["F_PU10"] == 1) & (binaryDF["P_J306"] == 1))] = 0.3
 
     # Check for attack 4
+    print ' - scenario 4'
     dfPrediction.loc[((binaryDF["S_PU6"] == 1) & (binaryDF["F_PU6"] == 1) & (binaryDF["S_PU7"] == 1) & (binaryDF["F_PU7"] == 1))] = 1#0.4
 
     # Check for scenario 5 (attack 1) (binaryDF["S_PU11"] == 1) &
     #dfPrediction.loc[(binaryDF["L_T7"] == 1)] = 0.5
 
     # Check for attack 5
+    print ' - scenario 5'
     dfPrediction.loc[((binaryDF["S_PU6"] == 1) & (binaryDF["F_PU6"] == 1) & (binaryDF["F_PU7"] == 1))] = 1#0.6
+
+    print ' - done'
 
     # Print Performance to console
     # tp = 0
@@ -120,17 +137,28 @@ def obtainFinalPrediction(binaryDF):
 	# print "TN: {} ".format(tn)
 
     # DETERMINE PERFORMANCE METRICS
+    print '\nPERFORMANCE METRICS\n'
+
+    # True Positive Rate aka Recall
     PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+    totalpoints = dfActualAttack.sum()
+    print 'Total datapoints: ' + str(totalpoints)
     print 'Total positive values: ' + str(PositiveTotal)
 
-    print dfPrediction.shape
-    print binaryDF.shape
+    # print dfPrediction.shape
+    # print binaryDF.shape
 
     TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
     print 'Total predicted positives: ' + str(TPtotal)
-    TPR = float(TPtotal)/PositiveTotal
+    TPR = float(TPtotal)/float(PositiveTotal)
     print 'TPR: ' + str(TPR)
+    Recall = TPR
+    print 'Recall: ' + str(Recall)
 
+    # Precision
+    FPtotal = dfPrediction[((dfActualAttack == 0) & (dfPrediction == 1))].sum()
+    Precision = float(TPtotal)/float(TPtotal + FPtotal)
+    print 'Precision: ' + str(Precision)
 
     # plot the prediction vs actual values
     fig = plt.figure(figsize=(8,4))

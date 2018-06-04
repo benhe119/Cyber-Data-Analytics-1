@@ -1,5 +1,5 @@
 """
-Process data for training dataset 1 of BATADAL SCADA data
+Process data of BATADAL SCADA data
 
 1) FFT analysis to remove signal noise
 2) Discretization of filtered signals
@@ -95,7 +95,8 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'N-gram' #ARMA, N-gram, PCA
+analysisMethod = 'ARMA' #ARMA, N-gram, PCA
+ensembleMethod = 'Method1' # Method2 or None
 
 print 'Analysis method: ' + analysisMethod
 
@@ -115,7 +116,7 @@ if analysisMethod == 'ARMA':
     # filter data
     # for field in []: #["L_T1"]: # L_Txx list
     #     filter([field],currentDataset)
-
+    #
     # only choose one field for the ARMA model
     # dta = df[["L_T1"]]
     # print durbin_watson statistic to choose ARMA model parameters (see tutorial)
@@ -160,7 +161,7 @@ elif analysisMethod == 'N-gram':
         # # show difference in length of data
         # lengthAnomalyList = len(anomalyList)
         # lengthResultsList = len(timestampsTrain2)
-
+        #
         # remove last values in timestamp until it matches the anomaly list length
         # this is because the discretization uses the data DIV n (of n-gram) and is
         # therefore different in length
@@ -197,7 +198,16 @@ else:
     # do nothing
     print 'no analysis method...'
 
-print 'Done!'
+if ensembleMethod == 'Method1':
+    print '\nEnsemble method 1'
+elif ensembleMethod == 'Method2':
+    print '\nEnsemble method 2'
+else:
+    # do nothing
+    print '\nno ensemble method analysis...'
+
+
+print '\nDone!'
 
 
 
