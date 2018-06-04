@@ -25,8 +25,7 @@ def PCA(csv):
 	pca.fit(training_normalized)
 	pca_model = pca.transform(training_normalized)
 
-	print pca_model
-
+	#print pca_model
 	#output variance and variance_ratio
 	print np.sort(pca.explained_variance_)[::-1]
 	print np.sort(pca.explained_variance_ratio_)[::-1]
@@ -47,9 +46,14 @@ def PCA(csv):
 	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
 	plt.show()
 
-	#plot one column
-	csv = csv.assign(PC1=pca_model[:,0])
-	csv['PC1'].plot(figsize=(15,5))
+	#plot component 5 (for comparison to show the normal behaviour)
+	csv = csv.assign(PC5=pca_model[:,5])
+	csv['PC5'].plot(figsize=(15,5))
+	plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	csv = csv.assign(PC6=pca_model[:,6])
+	csv['PC6'].plot(figsize=(15,5))
 	plt.show();
 
 	return
