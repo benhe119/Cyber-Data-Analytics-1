@@ -9,14 +9,16 @@ import matplotlib.pyplot as plt
 #read more: https://towardsdatascience.com/pca-using-python-scikit-learn-e653f8989e60
 
 #PCA selection of subspace
-def PCA(csv):
+def VisualizeComponentsPCA(trainDF):
 
+	labels = trainDF['ATT_FLAG'].copy(deep=True)
+	print labels.describe()
 	#delete the flag column
-	del csv['ATT_FLAG']
+	del trainDF['ATT_FLAG']
 
 	#scale
 	scaler = StandardScaler()
-	training_normalized = scaler.fit_transform(csv)
+	training_normalized = scaler.fit_transform(trainDF)
 	#print training_normalized
 	#print training_normalized.shape
 
@@ -41,55 +43,175 @@ def PCA(csv):
 	#plt.show()
 
 	#plot cumulative variance
+	plt.figure(1,figsize=(6,2.5))
+
+	plt.title('Cumulative Variance of Principal Components')
 	plt.xlabel('Principal Components')
 	plt.ylabel('Cumulative Variance Captured')
 	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
+	plt.grid()
+	plt.tight_layout()
 	plt.show()
 
+	print trainDF.describe()
+
+	### VISUALIZE DIFFERENT PCA COMPONENTS
+	sizeX = 6
+	sizeY = 3
+	xlabel = 'time'
+	ylabel = 'residual'
+
 	#plot component 5 (for comparison to show the normal behaviour)
-	csv = csv.assign(PC5=pca_model[:,5])
-	csv['PC5'].plot(figsize=(15,5))
-	plt.show();
+	plt.figure(3)
+	trainDF = trainDF.assign(PC3=pca_model[:,3])
+	trainDF['PC3'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC3')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
 
 	#plot component 6 or 7 (which are irregular)
-	csv = csv.assign(PC6=pca_model[:,6])
-	csv['PC6'].plot(figsize=(15,5))
-	plt.show();
+	plt.figure(4)
+	trainDF = trainDF.assign(PC4=pca_model[:,4])
+	trainDF['PC4'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC4')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	plt.figure(5)
+	trainDF = trainDF.assign(PC5=pca_model[:,5])
+	trainDF['PC5'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC5')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	plt.figure(6)
+	trainDF = trainDF.assign(PC6=pca_model[:,6])
+	trainDF['PC6'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC6')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 5 (for comparison to show the normal behaviour)
+	plt.figure(7)
+	trainDF = trainDF.assign(PC7=pca_model[:,7])
+	trainDF['PC7'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC7')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	plt.figure(8)
+	trainDF = trainDF.assign(PC8=pca_model[:,8])
+	trainDF['PC8'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC8')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 5 (for comparison to show the normal behaviour)
+	plt.figure(9)
+	trainDF = trainDF.assign(PC9=pca_model[:,9])
+	trainDF['PC9'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC9')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	plt.figure(10)
+	trainDF = trainDF.assign(PC10=pca_model[:,10])
+	trainDF['PC10'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC10')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 5 (for comparison to show the normal behaviour)
+	plt.figure(11)
+	trainDF = trainDF.assign(PC11=pca_model[:,11])
+	trainDF['PC11'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC11')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	# plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	plt.figure(12)
+	trainDF = trainDF.assign(PC12=pca_model[:,12])
+	trainDF['PC12'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC12')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	#plt.show();
+
+	#plot component 6 or 7 (which are irregular)
+	plt.figure(13)
+	trainDF = trainDF.assign(PC13=pca_model[:,13])
+	trainDF['PC13'].plot(figsize=(sizeX,sizeY))
+	plt.title('PC13')
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.grid()
+	#plt.show()
+
+	plt.figure(14)
+	labels.plot(figsize=(sizeX,sizeY))
+	plt.title('Actual Attacks')
+
+	plt.show()
 
 	return
 
 #PCA detection
-def PCA_detection(csv,testset):
+def PCA_detection(trainingDF,testDF):
 
-	#delete the flag column
-	#del csv['ATT_FLAG']
+	### TRAINING DATASET
 
-	#scale
-	scaler = StandardScaler()
-	training_normalized = scaler.fit_transform(csv)
-	#print training_normalized
+	# normalize all signals (remove mean and divide by variance)
+	scaler = StandardScaler(copy=False, with_mean=True, with_std=True)
+	training_normalized = scaler.fit_transform(trainingDF)
+
+	# create dataframe of normalized dataset
+	training_normalized_DF = pd.DataFrame(training_normalized, index=trainingDF.index, columns = trainingDF.columns)
+
+	#print training_normalized_DF.describe()
 	#print training_normalized.shape
 
+	# transform the training data into its PCA components
 	pca = decomposition.PCA()
 	pca.fit(training_normalized)
-	pca_model = pca.transform(training_normalized)
+	pca_training_model = pca.transform(training_normalized)
 
-	#cummulative variance ratio
+	# cumulative variance ratio
 	pca.explained_variance_ratio_.cumsum()
 
-	#load and process the test_dataset
-	#test_dataset = pd.read_csv("./data/BATADAL_test_dataset.csv",delimiter=',',parse_dates=True, index_col='DATETIME');
-	test_dataset = testset
-
 	#these lines need to be remove for the test_dataset (because they don't contain that label)
-	labels =  test_dataset['ATT_FLAG']
+	labels =  testDF['ATT_FLAG']
 	# del test_dataset['ATT_FLAG']
 
+	### TESTING DATASET
 
-	test_normalized = scaler.fit_transform(test_dataset)
-	pca_test = pca.transform(test_normalized)
+	# normalize all signals (remove mean and divide by variance)
+	test_normalized = scaler.fit_transform(testDF)
+	pca_test_model = pca.transform(test_normalized)
 
-	#rename variable for easier reading code below
+	# rename variable for easier reading code below
 	eigenvectors = pca.components_
 
 	# Matrix P represents principal components corresponding to normal subspace
@@ -113,8 +235,10 @@ def PCA_detection(csv,testset):
 	#Calculate SPE for each y_residual
 	spe = np.zeros((test_normalized.shape[0]))
 
-	# na will be set to 1 if the spe is greater than the threshold
+	# na will be set to 1 if the SPE is greater than the threshold
 	na = np.zeros((test_normalized.shape[0]))
+
+	# evaluate which residuals exceed a given threshold
 	threshold = 500
 	for i in range(test_normalized.shape[0]):
 	    spe[i] = np.square(np.sum(np.subtract(y_residual[i], test_normalized[i])))
@@ -123,15 +247,56 @@ def PCA_detection(csv,testset):
 	    if(spe[i] > threshold):
 	        na[i] = 1
 
+	predicted_attacks = pd.DataFrame(na,index=test_dataset.index,columns=['Prediction'])
+
+	#print predicted_attacks.describe()
+
+	# set detection Threshold
+	threshold = 500;
+
 	test_dataset = test_dataset.assign(ResidualVector=spe)
-	test_dataset['ResidualVector'].plot(figsize=(15,5))
-	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*500
-	test_dataset['ATT_FLAG'].plot(figsize=(15,5))
+	test_dataset['ResidualVector'] = test_dataset['ResidualVector']*0.0005
+	test_dataset['ResidualVector'].plot(figsize=(9,3),label='Residual Error')
+	predicted_attacks['Prediction'].plot(label='PCA-based Prediction')
+	test_dataset['ATT_FLAG'] = test_dataset['ATT_FLAG']*1
+	test_dataset['ATT_FLAG'].plot(label='Actual Attack')
+	#plt.plot([test_dataset['DatatimeIndex'].iloc[0], [test_dataset['DatatimeIndex'].iloc[-1]] ], [threshold, threshold],'k--')
+	#plt.plot([test_dataset.index[0], test_dataset.index[-1] ], [threshold, threshold],'k--')
+	#plt.plot(['2016-07-04 00:00:00', '2016-12-25 00:00:00' ], [threshold, threshold],'k--')
+	plt.grid()
+	plt.legend()
 	plt.show()
 
 
+	# DETERMINE PERFORMANCE METRICS
+	print '\nPERFORMANCE METRICS\n'
+
+	dfActualAttack = test_dataset['ATT_FLAG']
+	dfPrediction = predicted_attacks['Prediction']
+    # True Positive Rate aka Recall
+	PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+	totalpoints = dfActualAttack.sum()
+	print 'Total datapoints: ' + str(totalpoints)
+	print 'Total positive values: ' + str(PositiveTotal)
+
+    # print dfPrediction.shape
+    # print binaryDF.shape
+
+	TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
+	print 'Total predicted positives: ' + str(TPtotal)
+	TPR = float(TPtotal)/float(PositiveTotal)
+	print 'TPR: ' + str(TPR)
+	Recall = TPR
+	print 'Recall: ' + str(Recall)
+
+    # Precision
+	FPtotal = dfPrediction[((dfActualAttack == 0) & (dfPrediction == 1))].sum()
+	Precision = float(TPtotal)/float(TPtotal + FPtotal)
+	print 'Precision: ' + str(Precision)
+
 	# compute confusion matrix (this isn't working as it should..)
 
+	print '\n'
 	tp = 0
 	fp = 0
 	tn = 0

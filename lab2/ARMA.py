@@ -16,7 +16,7 @@ from statsmodels.tsa.arima_model import ARMA
 
 from statsmodels.graphics.api import qqplot
 
-def fitARMA(dataframe,currentfield,p=2,q=0):
+def fitARMA(dataframe,currentfield,p=2,q=0,threshold=0.8):
 
     print '\nFitting ARMA to: '
     print currentfield
@@ -78,7 +78,7 @@ def fitARMA(dataframe,currentfield,p=2,q=0):
         # dfInput.loc[np.abs(dfInput[0]) > threshold, 'boolean'] = True
         return dfOutput
 
-    dfBinary = applyThreshold(dfResiduals, 0.8)
+    dfBinary = applyThreshold(dfResiduals, threshold=threshold)
     # print 'dfBinary description: '
     # print dfBinary.describe()
 

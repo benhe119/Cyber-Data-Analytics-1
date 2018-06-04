@@ -1,5 +1,5 @@
 """
-Process data for training dataset 1 of BATADAL SCADA data
+Process data of BATADAL SCADA data
 
 1) FFT analysis to remove signal noise
 2) Discretization of filtered signals
@@ -24,7 +24,7 @@ from filter_data import filter, filter_F_PUxx, filter_S_PUxx, filter_P_Jxxx
 from discretize_data import discretizeBinary, discretizeSAX
 
 from ARMA import fitARMA
-from PCA import PCA, PCA_detection
+from PCA import VisualizeComponentsPCA, PCA_detection
 from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
 from applyARMA import getBinaryDF, obtainFinalPrediction
@@ -95,7 +95,8 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'N-gram' #ARMA, N-gram, PCA
+analysisMethod = 'PCA' #ARMA, N-gram, PCA
+ensembleMethod = 'Method1' # Method2 or None
 
 print 'Analysis method: ' + analysisMethod
 
@@ -115,7 +116,7 @@ if analysisMethod == 'ARMA':
     # filter data
     # for field in []: #["L_T1"]: # L_Txx list
     #     filter([field],currentDataset)
-
+    #
     # only choose one field for the ARMA model
     # dta = df[["L_T1"]]
     # print durbin_watson statistic to choose ARMA model parameters (see tutorial)
@@ -136,8 +137,6 @@ if analysisMethod == 'ARMA':
     # plt.show()
 
     obtainFinalPrediction(binaryDF)
-
-
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
@@ -161,7 +160,7 @@ elif analysisMethod == 'N-gram':
         # # show difference in length of data
         # lengthAnomalyList = len(anomalyList)
         # lengthResultsList = len(timestampsTrain2)
-
+        #
         # remove last values in timestamp until it matches the anomaly list length
         # this is because the discretization uses the data DIV n (of n-gram) and is
         # therefore different in length
@@ -189,16 +188,22 @@ elif analysisMethod == 'N-gram':
     df_train_2['ATT_FLAG'].plot(figsize=(8,4))
     plt.title('Attacks')
     plt.show()
-
-
 elif analysisMethod == 'PCA':
-	#PCA(df_train_1) #sub selection of data
-    PCA_detection(df_train_1,df_train_2)
+	VisualizeComponentsPCA(df_train_2) #sub selection of data
+    # PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
     print 'no analysis method...'
 
-print 'Done!'
+if ensembleMethod == 'Method1':
+    print '\nEnsemble method 1'
+elif ensembleMethod == 'Method2':
+    print '\nEnsemble method 2'
+else:
+    # do nothing
+    print '\nno ensemble method analysis...'
+
+print '\nDone!'
 
 
 
