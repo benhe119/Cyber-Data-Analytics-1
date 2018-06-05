@@ -28,6 +28,7 @@ from PCA import VisualizeComponentsPCA, PCA_detection
 from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
 from applyARMA import getBinaryDF, obtainFinalPrediction
+from ensembleFunctions import mergeORResults, mergeANDResults
 
 ### READ AND EDIT CSV FILE ###   ###############################################
 
@@ -95,7 +96,7 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'PCA' #ARMA, N-gram, PCA
+analysisMethod = 'NONE' #ARMA, N-gram, PCA
 ensembleMethod = 'Method1' # Method2 or None
 
 print 'Analysis method: ' + analysisMethod
@@ -136,7 +137,8 @@ if analysisMethod == 'ARMA':
     #     fitARMA(currentDataset,field,0,p=2,q=2)
     # plt.show()
 
-    obtainFinalPrediction(binaryDF)
+    armaresult = obtainFinalPrediction(binaryDF)
+
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
@@ -189,7 +191,7 @@ elif analysisMethod == 'N-gram':
     plt.title('Attacks')
     plt.show()
 elif analysisMethod == 'PCA':
-	VisualizeComponentsPCA(df_train_2) #sub selection of data
+	predictionDF = VisualizeComponentsPCA(df_train_2) #sub selection of data
     # PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
@@ -198,17 +200,69 @@ else:
 if ensembleMethod == 'Method1':
     print '\nEnsemble method 1'
 
-    # use ARMA and PCA
+    # obtain ARMA result
+    #ARMAdetectionDF = obtainFinalPrediction(getBinaryDF(df_train_2))
+    forARMAdf = df_train_2.copy(deep=True)
 
-    
+    ARMAdetectionDF = VisualizeComponentsPCA(forARMAdf)
+
+    forPCAdf = df_train_2.copy(deep=True)
+    # obtain PCA result
+    PCAdetectionDF = VisualizeComponentsPCA(forPCAdf)
+
+    print '\n\n\nDescribe:\n'
+    print ARMAdetectionDF.describe()
+    print PCAdetectionDF.describe()
+
+    ARMAdetectionDF.rename('ARMA_prediction')
+    PCAdetectionDF.rename('PCA_prediction')
+
+    print '\n\n\nDescribe:\n'
+    print ARMAdetectionDF.describe()
+    print PCAdetectionDF.describe()
+
+    ARMAdetectionDF = pd.DataFrame(ARMAdetectionDF,index=ARMAdetectionDF.index)
+
+    # print ARMAdetectionDF.index
+    # print PCAdetectionDF.index
+
+    print '\n\n\n\n'
+    print ARMAdetectionDF.describe()
+    #
+    # print ARMAdetectionDF.columns
+    # print '\n'
+    # print PCAdetectionDF.columns
+    # print '\n'
+
+    plt.close()
+    plt.figure(1)
+    PCAdetectionDF.plot()
+    plt.show()
+
+    # merge the two detection fields
+    ensembleORDF = mergeORResults(ARMAdetectionDF,ARMAdetectionDF)
+
+    # plt.close()
+    # plt.figure(1)
+    # ensembleORDF.plot()
+    # plt.show()
+
+    #ensembleANDDF = mergeANDResults(ARMAdetectionDF,PCAdetectionDF)
+
+    # ... an plot
+    attackActual = df_train_2['ATT_FLAG']
+
+    print ensembleORDF.describe()
+
+    # plt.figure(1)
+    # ensembleDF['Result'].plot()
+
 
 else:
     # do nothing
     print '\nno ensemble method analysis...'
 
 print '\nDone!'
-
-
 
 
 

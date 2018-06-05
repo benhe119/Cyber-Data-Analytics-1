@@ -86,7 +86,7 @@ def VisualizeComponentsPCA(trainDF):
 
 	print PCAcomponentDF.describe()
 
-	shouldPlot = True
+	shouldPlot = False
 
 	if shouldPlot:
 		#plot component 5 (for comparison to show the normal behaviour)
@@ -275,11 +275,11 @@ def VisualizeComponentsPCA(trainDF):
 	plt.ylabel('Attack Bool')
 	plt.tight_layout()
 	plt.savefig('pca_results.eps',div=300,format='eps')
-	plt.show()
+	#plt.show()
 
 
 
-	return
+	return dfPrediction
 
 def applyThreshold(datafield, threshold):
 

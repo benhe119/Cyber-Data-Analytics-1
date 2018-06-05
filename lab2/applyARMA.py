@@ -172,4 +172,4 @@ def obtainFinalPrediction(binaryDF):
     plt.grid()
     plt.show()
 
-    return # void
+    return dfPrediction
