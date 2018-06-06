@@ -96,8 +96,8 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'NONE' #ARMA, N-gram, PCA
-ensembleMethod = 'Method1' # Method2 or None
+analysisMethod = 'ARMA' #ARMA, N-gram, PCA
+ensembleMethod = 'NONE' # Method1 or None
 
 print 'Analysis method: ' + analysisMethod
 
