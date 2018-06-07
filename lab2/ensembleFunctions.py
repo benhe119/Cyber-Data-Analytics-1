@@ -15,10 +15,26 @@ def mergeORResults(df1, df2):
     mergedDF = df1.copy(deep=True)
     # set all columns to zero
     mergedDF[:] = 0
+    #print mergedDF.describe()
     # add OR operator
-    mergedDF[((df1['PC3']==1) & (df2['PC3']==1))] == 1
+    #mergedDF['ARMA_prediction'][((df1['ARMA_prediction']==1) | (df2['PCA_prediction']==1))] == 1
+    mergedDF.loc[((df1["ARMA_prediction"] == 1) | (df2["PCA_prediction"] == 1))] = 1
+
+    #print mergedDF.describe()
+
     return mergedDF
 
 # concatenates two datasets using an AND operation for detection of attacks
 def mergeANDResults(df1, df2):
-    return df1
+    # copy same size dataframe
+    mergedDF = df1.copy(deep=True)
+    # set all columns to zero
+    mergedDF[:] = 0
+    #print mergedDF.describe()
+    # add OR operator
+    #mergedDF['ARMA_prediction'][((df1['ARMA_prediction']==1) | (df2['PCA_prediction']==1))] == 1
+    mergedDF.loc[((df1["ARMA_prediction"] == 1) & (df2["PCA_prediction"] == 1))] = 1
+
+    #print mergedDF.describe()
+
+    return mergedDF

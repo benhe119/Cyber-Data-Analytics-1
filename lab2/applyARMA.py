@@ -137,6 +137,7 @@ def obtainFinalPrediction(binaryDF):
 	# print "TN: {} ".format(tn)
 
     # DETERMINE PERFORMANCE METRICS
+    shouldPlot = False
     print '\nPERFORMANCE METRICS\n'
 
     # True Positive Rate aka Recall
@@ -161,15 +162,16 @@ def obtainFinalPrediction(binaryDF):
     print 'Precision: ' + str(Precision)
 
     # plot the prediction vs actual values
-    fig = plt.figure(figsize=(8,4))
-    ax1 = fig.add_subplot(111)
+    if shouldPlot:
+        fig = plt.figure(figsize=(8,4))
+        ax1 = fig.add_subplot(111)
 
-    ax1 = dfPrediction.plot(ax=ax1,label='prediction')
-    ax1 = binaryDF["ATT_FLAG"].plot(ax=ax1,label='actual')
-    ax1 = plt.title('Actual vs Predicted Attack using ARMA')
-    plt.ylabel('Attack Bool')
-    plt.legend()
-    plt.grid()
-    plt.show()
+        ax1 = dfPrediction.plot(ax=ax1,label='prediction')
+        ax1 = binaryDF["ATT_FLAG"].plot(ax=ax1,label='actual')
+        ax1 = plt.title('Actual vs Predicted Attack using ARMA')
+        plt.ylabel('Attack Bool')
+        plt.legend()
+        plt.grid()
+        plt.show()
 
     return dfPrediction

@@ -265,16 +265,16 @@ def VisualizeComponentsPCA(trainDF):
 	Precision = float(TPtotal)/float(TPtotal + FPtotal)
 	print 'Precision: ' + str(Precision)
 
-
-	plt.figure(14)
-	dfPrediction.plot(figsize=(sizeX,sizeY),label='Detected Attacks')
-	labels.plot(figsize=(sizeX,sizeY),label='Actual Attack')
-	plt.title('PCA Detection of Attacks')
-	plt.legend()
-	plt.grid()
-	plt.ylabel('Attack Bool')
-	plt.tight_layout()
-	plt.savefig('pca_results.eps',div=300,format='eps')
+	if shouldPlotBinary:
+		plt.figure(14)
+		dfPrediction.plot(figsize=(sizeX,sizeY),label='Detected Attacks')
+		labels.plot(figsize=(sizeX,sizeY),label='Actual Attack')
+		plt.title('PCA Detection of Attacks')
+		plt.legend()
+		plt.grid()
+		plt.ylabel('Attack Bool')
+		plt.tight_layout()
+		plt.savefig('pca_results.eps',div=300,format='eps')
 	#plt.show()
 
 
