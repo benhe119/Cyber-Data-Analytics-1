@@ -19,19 +19,25 @@ import scipy.fftpack as fftpk
 import scipy.signal as sgnl
 from matplotlib import pyplot as plt
 
-from pcapfile import savefile
-from pcapfile.protocols.linklayer import ethernet
-from pcapfile.protocols.network import ip
+# from pcapfile import savefile
+# from pcapfile.protocols.linklayer import ethernet
+# from pcapfile.protocols.network import ip
+#
+# import sys
+# sys.path.insert(0, 'other/pcap2frame-master')
+# import pcap2frame
+#
+# import pyshark
+#
+# cap = pyshark.FileCapture('data/capture20110815-2.pcap.netflow.labeled')
 
-import sys
-sys.path.insert(0, 'other/pcap2frame-master')
-import pcap2frame
+df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True) #, index_col='DATETIME')
 
-import pyshark
+print df_ctu13_42.describe()
 
-cap = pyshark.FileCapture('data/capture20110815-2.pcap.netflow.labeled')
+print df_ctu13_42.head()
 
-
+print df_ctu13_42.columns.values
 
 
 # testcap = open('data/capture20110815-2.pcap.netflow.labeled', 'rb')
