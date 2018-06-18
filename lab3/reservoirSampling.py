@@ -56,12 +56,14 @@ def  applyReservoirSampling(df_column, reservoirSize):
     k = reservoirSize
 
     # print n and k
-    print 'n = ' + str(n)
-    print 'k = ' + str(k)
-    print ''
+    # print 'n = ' + str(n)
+    # print 'k = ' + str(k)
+    # print ''
 
     # fill reservoir with first k elements of df_column
     df_reservoir = df_column.head(k)
+
+    print df_reservoir
 
     onesmat = np.ones((k,1)).flatten(order='F')
     df_ones = pd.DataFrame(onesmat,columns=['Key'])
@@ -71,8 +73,8 @@ def  applyReservoirSampling(df_column, reservoirSize):
 
     df_reservoir = df_reservoir.to_frame().reset_index()
 
-    print df_reservoir
-    print df_ones
+    #print df_reservoir
+    #print df_ones
 
     #df_ones.append(df_reservoir) #,ignore_index=True)
 
@@ -89,7 +91,7 @@ def  applyReservoirSampling(df_column, reservoirSize):
 
     df_column = df_column.to_frame().reset_index()
 
-    print df_column.iat[2,1]
+    #print df_column.iat[2,1]
 
     # print df_column.iloc[2]
 
@@ -112,5 +114,6 @@ def  applyReservoirSampling(df_column, reservoirSize):
         #     df_reservoir.iloc[j] = df_column.iloc[j]
 
     print df_PQ
+    print '\n'
 
-    return df_PQ
+    return# df_PQ

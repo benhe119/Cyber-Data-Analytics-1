@@ -59,7 +59,12 @@ df_ctu13_42[['SrcIPAddr','SrcPort']] = df_ctu13_42['SrcIPAddr_Port'].str.split('
 
 # df_reservoir = applyAlgorithmR(df_ctu13_42["SrcIPAddr"],10)
 
-df_reservoir = applyReservoirSampling(df_ctu13_42["SrcIPAddr"],10)
+for resSize in [5, 10, 15, 20, 30]:
+    print '-------------------------------------------\nAnalyzing Reservoir ...'
+    print ''
+    print 'reservoir size:' + str(resSize)
+    print ''
+    applyReservoirSampling(df_ctu13_42["SrcIPAddr"],resSize)
 
 
 
