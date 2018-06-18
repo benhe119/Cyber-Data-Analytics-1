@@ -30,9 +30,9 @@ df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", d
 
 # Describe Data
 # print df_ctu13_42.describe()
-# print df_ctu13_42.head()
+print df_ctu13_42.head()
 # print df_ctu13_42.columns.values
-# print df_ctu13_42.columns
+print df_ctu13_42.columns
 
 # ==============================================================================
 #                   Apply minhashing a.k.a min-wise hashing
@@ -42,7 +42,10 @@ df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", d
 HostIP = '147.32.'
 
 # only consider rows where the source (SRC) is the host IP
-df_ctu13_42 = df_ctu13_42[(df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP))]
+# df_ctu13_42 = df_ctu13_42[(df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP))]
+
+# Only consider rows where (1) Destination IP = hostIP AND (2) Source IP != hostIP
+df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) & (~df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP)))]
 
 print df_ctu13_42.describe()
 
