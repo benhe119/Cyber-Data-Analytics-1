@@ -23,22 +23,24 @@ from statsmodels.graphics.api import qqplot
 # import scipy.signal as sgnl
 from matplotlib import pyplot as plt
 
+from reservoirSampling import applyAlgorithmR, applyReservoirSampling
+
 # Read data from CTU113 dataset
 
 # dataset 42
-df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True)#, index_col='Date flow start')
+df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True, index_col='DateFlowStart')
 
 # Describe Data
 # print df_ctu13_42.describe()
-print df_ctu13_42.head()
+#print df_ctu13_42.head()
 # print df_ctu13_42.columns.values
-print df_ctu13_42.columns
+# print df_ctu13_42.columns
 
 # ==============================================================================
-#                   Apply minhashing a.k.a min-wise hashing
+#                       Import and Pre-process the data
 # ==============================================================================
 
-# we see that the host's IP address is 147.32.***.***
+# we see that the host's IP address starts with 147.32.***.***
 HostIP = '147.32.'
 
 # only consider rows where the source (SRC) is the host IP
@@ -47,11 +49,22 @@ HostIP = '147.32.'
 # Only consider rows where (1) Destination IP = hostIP AND (2) Source IP != hostIP
 df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) & (~df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP)))]
 
-print df_ctu13_42.describe()
+# ==============================================================================
+#                           Min-wise hashing
+# ==============================================================================
+# objective: estimate the distribution over the other ip addresses
 
-# only consider fields where hostIP is associated with
+# split source IP:port into IP address and port separately
+df_ctu13_42[['SrcIPAddr','SrcPort']] = df_ctu13_42['SrcIPAddr_Port'].str.split(':', expand=True)
+
+# df_reservoir = applyAlgorithmR(df_ctu13_42["SrcIPAddr"],10)
+
+df_reservoir = applyReservoirSampling(df_ctu13_42["SrcIPAddr"],10)
 
 
+
+# print df_reservoir.count
+# print df_reservoir.describe()
 
 # ==============================================================================
 #                         Apply Min-Count hashing
