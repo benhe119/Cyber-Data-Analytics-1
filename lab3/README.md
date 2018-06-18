@@ -1,5 +1,5 @@
-## Cyber Data Analytics - Lab 2 ##
-Anomaly Detection in SCADA systems - BATADAL data set
+## Cyber Data Analytics - Lab 3 ##
+
 
 Group 60 - Ernst Mulders and Alex Berndt
 
@@ -26,4 +26,4 @@ Anomaly detection is done by using different methods:
 - **N-gram** using SAX discretization and Markov chains
 - Principle Components Analysis (**PCA**)
 
-In ***processTrainingDataset.py***, change *analysisMethod* (line 99) to try the different methods. The ensemble methods can also be run by changing the *ensembleMethod* (line 100) variable.
+In ***processTrainingDataset.py***, change *analysisMethod* (line 82) to try the different methods

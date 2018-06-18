@@ -43,15 +43,15 @@ def VisualizeComponentsPCA(trainDF):
 	#plt.show()
 
 	#plot cumulative variance
-	plt.figure(1,figsize=(6,2.5))
-
-	plt.title('Cumulative Variance of Principal Components')
-	plt.xlabel('Principal Components')
-	plt.ylabel('Cumulative Variance Captured')
-	plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
-	plt.grid()
-	plt.tight_layout()
-	plt.show()
+	# plt.figure(20,figsize=(6,2.5))
+	#
+	# plt.title('Cumulative Variance of Principal Components')
+	# plt.xlabel('Principal Components')
+	# plt.ylabel('Cumulative Variance Captured')
+	# plt.plot(x_axis, pca.explained_variance_ratio_.cumsum())
+	# plt.grid()
+	# plt.tight_layout()
+	#plt.show()
 
 	print trainDF.describe()
 
@@ -61,122 +61,236 @@ def VisualizeComponentsPCA(trainDF):
 	xlabel = 'time'
 	ylabel = 'residual'
 
-	#plot component 5 (for comparison to show the normal behaviour)
-	plt.figure(3)
-	trainDF = trainDF.assign(PC3=pca_model[:,3])
-	trainDF['PC3'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC3')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+	# assign PCA components to trainDF
+	PCAcomponentDF = pd.DataFrame(trainDF.index,index=trainDF.index)
+	print PCAcomponentDF.describe()
+	PCAcomponentDF = PCAcomponentDF.assign(PC3=pca_model[:,3])
+	PCAcomponentDF = PCAcomponentDF.assign(PC4=pca_model[:,4])
+	PCAcomponentDF = PCAcomponentDF.assign(PC5=pca_model[:,5])
+	PCAcomponentDF = PCAcomponentDF.assign(PC6=pca_model[:,6])
+	PCAcomponentDF = PCAcomponentDF.assign(PC7=pca_model[:,7])
+	PCAcomponentDF = PCAcomponentDF.assign(PC8=pca_model[:,8])
+	PCAcomponentDF = PCAcomponentDF.assign(PC9=pca_model[:,9])
+	PCAcomponentDF = PCAcomponentDF.assign(PC10=pca_model[:,10])
+	PCAcomponentDF = PCAcomponentDF.assign(PC11=pca_model[:,11])
+	PCAcomponentDF = PCAcomponentDF.assign(PC12=pca_model[:,12])
+	PCAcomponentDF = PCAcomponentDF.assign(PC13=pca_model[:,13])
+	PCAcomponentDF = PCAcomponentDF.assign(PC14=pca_model[:,14])
+	print 'added PCA components'
+	print PCAcomponentDF.describe()
+	# normalize
+	# del PCAcomponentDF['DATETIME']
+	# PCAcomponentsNormalized = scaler.fit_transform(PCAcomponentDF)
+	# print 'normalize!'
+	PCAcomponentDF = PCAcomponentDF.drop('DATETIME', axis=1).abs()
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(4)
-	trainDF = trainDF.assign(PC4=pca_model[:,4])
-	trainDF['PC4'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC4')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+	print PCAcomponentDF.describe()
 
-	plt.figure(5)
-	trainDF = trainDF.assign(PC5=pca_model[:,5])
-	trainDF['PC5'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC5')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+	shouldPlot = False
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(6)
-	trainDF = trainDF.assign(PC6=pca_model[:,6])
-	trainDF['PC6'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC6')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+	if shouldPlot:
+		#plot component 5 (for comparison to show the normal behaviour)
+		plt.figure(3)
+		PCAcomponentDF['PC3'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC3')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		plt.savefig('pc3_component.eps',div=300,format='eps')
+		# plt.show();
 
-	#plot component 5 (for comparison to show the normal behaviour)
-	plt.figure(7)
-	trainDF = trainDF.assign(PC7=pca_model[:,7])
-	trainDF['PC7'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC7')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+		#plot component 6 or 7 (which are irregular)
+		plt.figure(4)
+		PCAcomponentDF['PC4'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC4')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		plt.savefig('pc4_component.eps',div=300,format='eps')
+		# plt.show();
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(8)
-	trainDF = trainDF.assign(PC8=pca_model[:,8])
-	trainDF['PC8'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC8')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+		plt.figure(5)
 
-	#plot component 5 (for comparison to show the normal behaviour)
-	plt.figure(9)
-	trainDF = trainDF.assign(PC9=pca_model[:,9])
-	trainDF['PC9'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC9')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+		PCAcomponentDF['PC5'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC5')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		plt.savefig('pc5_component.eps',div=300,format='eps')
+		# plt.show();
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(10)
-	trainDF = trainDF.assign(PC10=pca_model[:,10])
-	trainDF['PC10'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC10')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+		#plot component 6 or 7 (which are irregular)
+		plt.figure(6)
+		# trainDF = trainDF.assign(PC6=pca_model[:,6])
+		PCAcomponentDF['PC6'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC6')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		# plt.show();
 
-	#plot component 5 (for comparison to show the normal behaviour)
-	plt.figure(11)
-	trainDF = trainDF.assign(PC11=pca_model[:,11])
-	trainDF['PC11'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC11')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	# plt.show();
+		#plot component 5 (for comparison to show the normal behaviour)
+		plt.figure(7)
+		# trainDF = trainDF.assign(PC7=pca_model[:,7])
+		PCAcomponentDF['PC7'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC7')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		# plt.show();
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(12)
-	trainDF = trainDF.assign(PC12=pca_model[:,12])
-	trainDF['PC12'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC12')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
-	#plt.show();
+		#plot component 6 or 7 (which are irregular)
+		plt.figure(8)
+		# trainDF = trainDF.assign(PC8=pca_model[:,8])
+		PCAcomponentDF['PC8'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC8')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		# plt.show();
 
-	#plot component 6 or 7 (which are irregular)
-	plt.figure(13)
-	trainDF = trainDF.assign(PC13=pca_model[:,13])
-	trainDF['PC13'].plot(figsize=(sizeX,sizeY))
-	plt.title('PC13')
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.grid()
+		#plot component 5 (for comparison to show the normal behaviour)
+		# plt.figure(9)
+		# # trainDF = trainDF.assign(PC9=pca_model[:,9])
+		# PCAcomponentDF['PC9'].plot(figsize=(sizeX,sizeY))
+		# plt.title('PC9')
+		# plt.xlabel(xlabel)
+		# plt.ylabel(ylabel)
+		# plt.grid()
+		# plt.show();
+
+		#plot component 6 or 7 (which are irregular)
+		# plt.figure(10)
+		# # trainDF = trainDF.assign(PC10=pca_model[:,10])
+		# PCAcomponentDF['PC10'].plot(figsize=(sizeX,sizeY))
+		# plt.title('PC10')
+		# plt.xlabel(xlabel)
+		# plt.ylabel(ylabel)
+		# plt.grid()
+		# plt.show();
+
+		#plot component 5 (for comparison to show the normal behaviour)
+		plt.figure(11)
+		# trainDF = trainDF.assign(PC11=pca_model[:,11])
+		PCAcomponentDF['PC11'].plot(figsize=(sizeX,sizeY))
+		plt.title('PC11')
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.grid()
+		# plt.show();
+
+		#plot component 6 or 7 (which are irregular)
+		# plt.figure(12)
+		# # trainDF = trainDF.assign(PC12=pca_model[:,12])
+		# PCAcomponentDF['PC12'].plot(figsize=(sizeX,sizeY))
+		# plt.title('PC12')
+		# plt.xlabel(xlabel)
+		# plt.ylabel(ylabel)
+		# plt.grid()
+		#plt.show();
+
+		#plot component 6 or 7 (which are irregular)
+		# plt.figure(13)
+		# # trainDF = trainDF.assign(PC13=pca_model[:,13])
+		# PCAcomponentDF['PC13'].plot(figsize=(sizeX,sizeY))
+		# plt.title('PC13')
+		# plt.xlabel(xlabel)
+		# plt.ylabel(ylabel)
+		# plt.grid()
+		#plt.show()
+
+	binaryDF = PCAcomponentDF.copy(deep=True)
+
+	binaryDF['PC3'] = applyThreshold(binaryDF['PC3'],5.5)
+	binaryDF['PC4'] = applyThreshold(binaryDF['PC4'],5)
+	binaryDF['PC5'] = applyThreshold(binaryDF['PC5'],6)
+	binaryDF['PC6'] = applyThreshold(binaryDF['PC6'],5)
+	binaryDF['PC7'] = applyThreshold(binaryDF['PC7'],6.37)
+	#binaryDF['PC8'] = applyThreshold(binaryDF['PC8'],4)
+	binaryDF['PC11'] = applyThreshold(binaryDF['PC11'],3)
+
+	# print 'descirbe DF'
+	# print binaryDF.describe()
+	#
+	# print binaryDF['PC3']
+
+	# plt.figure(12)
+	# PCAcomponentDF['PC3'].plot(figsize=(sizeX,sizeY))
+	shouldPlotBinary = False
+	if shouldPlotBinary:
+		plt.figure(1)
+		binaryDF['PC3'].plot(figsize=(sizeX,sizeY))
+		plt.figure(2)
+		binaryDF['PC4'].plot(figsize=(sizeX,sizeY))
+		plt.figure(3)
+		binaryDF['PC5'].plot(figsize=(sizeX,sizeY))
+		plt.figure(4)
+		binaryDF['PC6'].plot(figsize=(sizeX,sizeY))
+		plt.figure(5)
+		binaryDF['PC7'].plot(figsize=(sizeX,sizeY))
+		#plt.figure(6)
+		#binaryDF['PC8'].plot(figsize=(sizeX,sizeY))
+		plt.figure(7)
+		binaryDF['PC11'].plot(figsize=(sizeX,sizeY))
+
+	dfPrediction = binaryDF.copy(deep=True)
+	dfPrediction = dfPrediction['PC3']*0.0
+	print dfPrediction.describe()
+	dfPrediction[((binaryDF["PC3"] == 1) | (binaryDF["PC4"] == 1) | (binaryDF["PC5"] == 1) | (binaryDF["PC6"] == 1) | (binaryDF["PC7"] == 1) | (binaryDF["PC11"] == 1))] = 1#0.1
+
+	# DETERMINE PERFORMANCE METRICS
+	print '\nPERFORMANCE METRICS\n'
+
+	dfActualAttack = labels
+	# dfPrediction
+
+	# True Positive Rate aka Recall
+	PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+	totalpoints = dfActualAttack.sum()
+	print 'Total datapoints: ' + str(totalpoints)
+	print 'Total positive values: ' + str(PositiveTotal)
+
+	# print dfPrediction.shape
+	# print binaryDF.shape
+
+	TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
+	print 'Total predicted positives: ' + str(TPtotal)
+	TPR = float(TPtotal)/float(PositiveTotal)
+	print 'TPR: ' + str(TPR)
+	Recall = TPR
+	print 'Recall: ' + str(Recall)
+
+	# Precision
+	FPtotal = dfPrediction[((dfActualAttack == 0) & (dfPrediction == 1))].sum()
+	Precision = float(TPtotal)/float(TPtotal + FPtotal)
+	print 'Precision: ' + str(Precision)
+
+	if shouldPlotBinary:
+		plt.figure(14)
+		dfPrediction.plot(figsize=(sizeX,sizeY),label='Detected Attacks')
+		labels.plot(figsize=(sizeX,sizeY),label='Actual Attack')
+		plt.title('PCA Detection of Attacks')
+		plt.legend()
+		plt.grid()
+		plt.ylabel('Attack Bool')
+		plt.tight_layout()
+		plt.savefig('pca_results.eps',div=300,format='eps')
 	#plt.show()
 
-	plt.figure(14)
-	labels.plot(figsize=(sizeX,sizeY))
-	plt.title('Actual Attacks')
 
-	plt.show()
 
-	return
+	return dfPrediction
+
+def applyThreshold(datafield, threshold):
+
+	resultfield = datafield.copy(deep=True)
+
+	# set all values to 0
+	resultfield[:] = 0;
+
+	resultfield[(datafield>threshold)] = 1
+
+	return resultfield
 
 #PCA detection
 def PCA_detection(trainingDF,testDF):

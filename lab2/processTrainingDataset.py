@@ -28,6 +28,7 @@ from PCA import VisualizeComponentsPCA, PCA_detection
 from N_gram import N_gram
 from general_functions import standardize_dataset, standardize_dataset_train_2, standardize_dataset_test
 from applyARMA import getBinaryDF, obtainFinalPrediction
+from ensembleFunctions import mergeORResults, mergeANDResults
 
 ### READ AND EDIT CSV FILE ###   ###############################################
 
@@ -95,8 +96,9 @@ if familiarizeData:
 
     plt.show()
 
-analysisMethod = 'PCA' #ARMA, N-gram, PCA
-ensembleMethod = 'Method1' # Method2 or None
+analysisMethod = 'NONE' #ARMA, N-gram, PCA
+ensembleMethod = 'Active' # Active or None
+operator = 'OR'
 
 print 'Analysis method: ' + analysisMethod
 
@@ -136,7 +138,8 @@ if analysisMethod == 'ARMA':
     #     fitARMA(currentDataset,field,0,p=2,q=2)
     # plt.show()
 
-    obtainFinalPrediction(binaryDF)
+    armaresult = obtainFinalPrediction(binaryDF)
+
 elif analysisMethod == 'N-gram':
 
     # filter all L_Txx data using FFT
@@ -189,23 +192,125 @@ elif analysisMethod == 'N-gram':
     plt.title('Attacks')
     plt.show()
 elif analysisMethod == 'PCA':
-	VisualizeComponentsPCA(df_train_2) #sub selection of data
+	predictionDF = VisualizeComponentsPCA(df_train_2) #sub selection of data
     # PCA_detection(df_train_1,df_train_2)
 else:
     # do nothing
     print 'no analysis method...'
 
-if ensembleMethod == 'Method1':
-    print '\nEnsemble method 1'
-elif ensembleMethod == 'Method2':
-    print '\nEnsemble method 2'
+if ensembleMethod == 'Active':
+    print '\nEnsemble method:'
+    print operator
+
+    # obtain ARMA result
+    ARMAdetectionDF = obtainFinalPrediction(getBinaryDF(df_train_2))
+    forARMAdf = df_train_2.copy(deep=True)
+
+    #ARMAdetectionDF = VisualizeComponentsPCA(forARMAdf)
+
+    forPCAdf = df_train_2.copy(deep=True)
+    # obtain PCA result
+    PCAdetectionDF = VisualizeComponentsPCA(forPCAdf)
+
+    ARMAdetectionDF.rename('ARMA_prediction',inplace=True)
+    PCAdetectionDF.rename('PCA_prediction',inplace=True)
+
+    # convert series to dataframes for editing
+    ARMAdetectionDF = pd.DataFrame(ARMAdetectionDF,index=ARMAdetectionDF.index)
+    PCAdetectionDF = pd.DataFrame(PCAdetectionDF,index=PCAdetectionDF.index)
+
+    # plt.close('all')
+    plt.figure(1)
+    PCAdetectionDF.plot(label='PCA binary')
+    plt.title('PCA')
+    plt.legend()
+    plt.grid()
+
+    plt.figure(2)
+    ARMAdetectionDF.plot(label='ARMA binary')
+    plt.title('ARMA')
+    plt.legend()
+    plt.grid()
+
+    #plt.show()
+    # merge the two detection fields
+    if operator == 'OR':
+        ensembleORDF = mergeORResults(ARMAdetectionDF,PCAdetectionDF)
+    elif operator == 'AND':
+        ensembleORDF = mergeANDResults(ARMAdetectionDF,PCAdetectionDF)
+    else:
+        print 'no operator selected... implementing AND operator'
+        ensembleORDF = mergeANDResults(ARMAdetectionDF,PCAdetectionDF)
+    # ... an plot
+    attackActual = df_train_2['ATT_FLAG']
+
+    print 'Ensemble ORDF describe: '
+    print ensembleORDF.describe()
+
+    plt.figure(figsize=(6,4))
+    plt.title('Ensemble Method: ' + str(operator) + ' operator')
+    plt.subplot(3,1,1)
+    ensembleORDF['ARMA_prediction'].plot(label='ensemble detection')
+    attackActual.plot(label='actual attack')
+    plt.legend()
+    plt.grid()
+
+    plt.subplot(3,1,2)
+    ARMAdetectionDF['ARMA_prediction'].plot(label='ARMA only detection')
+    plt.legend()
+    plt.grid()
+
+    plt.subplot(3,1,3)
+    PCAdetectionDF['PCA_prediction'].plot(label='PCA only detection')
+    plt.legend()
+    plt.grid()
+
+    # DETERMINE PERFORMANCE METRICS
+    print '\nPERFORMANCE METRICS\n'
+
+    dfPrediction = ensembleORDF['ARMA_prediction']
+    dfActualAttack = attackActual
+    # True Positive Rate aka Recall
+    PositiveTotal = dfActualAttack[dfActualAttack == 1].sum()
+    totalpoints = dfActualAttack.sum()
+    print 'Total datapoints: ' + str(totalpoints)
+    print 'Total positive values: ' + str(PositiveTotal)
+
+    # print dfPrediction.shape
+    # print binaryDF.shape
+
+    TPtotal = dfPrediction[((dfActualAttack == 1) & (dfPrediction == 1))].sum()
+    print 'Total predicted positives: ' + str(TPtotal)
+    TPR = float(TPtotal)/float(PositiveTotal)
+    print 'TPR: ' + str(TPR)
+    Recall = TPR
+    print 'Recall: ' + str(Recall)
+
+    # Precision
+    FPtotal = dfPrediction[((dfActualAttack == 0) & (dfPrediction == 1))].sum()
+    Precision = float(TPtotal)/float(TPtotal + FPtotal)
+    print 'Precision: ' + str(Precision)
+
+    # plot the prediction vs actual values
+    fig = plt.figure(figsize=(8,4))
+    ax1 = fig.add_subplot(111)
+
+    ax1 = dfPrediction.plot(ax=ax1,label='prediction')
+    ax1 = attackActual.plot(ax=ax1,label='actual')
+    ax1 = plt.title('Actual vs Predicted Attack using ARMA')
+    plt.ylabel('Attack Bool')
+    plt.legend()
+    plt.grid()
+    #plt.show()
+
+    plt.show()
+
+
 else:
     # do nothing
     print '\nno ensemble method analysis...'
 
 print '\nDone!'
-
-
 
 
 
