@@ -24,6 +24,8 @@ from statsmodels.graphics.api import qqplot
 from matplotlib import pyplot as plt
 
 from reservoirSampling import applyAlgorithmR, applyReservoirSampling
+from CountMinSketch import CountMinSketch
+
 
 # Read data from CTU113 dataset
 
@@ -74,3 +76,14 @@ for resSize in [5, 10, 15, 20, 30]:
 # ==============================================================================
 #                         Apply Min-Count hashing
 # ==============================================================================
+w = 1000#number of column
+d = 10#number of row, hash count
+data = df_ctu13_42["SrcIPAddr"].as_matrix()
+cm = CountMinSketch(w, d)
+query = df_ctu13_42["SrcIPAddr"]
+for item in data:
+    cm.add(str(item))
+for item in query:
+    frequency_est = cm.estimate(str(item))
+    print str(item)+': '+str(frequency_est)
+    
