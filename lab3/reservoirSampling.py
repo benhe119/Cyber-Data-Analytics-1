@@ -14,7 +14,7 @@ from statsmodels.graphics.api import qqplot
 # import scipy.fftpack as fftpk
 # import scipy.signal as sgnl
 from matplotlib import pyplot as plt
-from random import randint, uniform
+from random import randint, uniform, seed
 
 
 def  applyAlgorithmR(df_column, reservoirSize):
@@ -95,7 +95,11 @@ def  applyReservoirSampling(df_column, reservoirSize):
 
     # print df_column.iloc[2]
 
+    # keep answers consistent
+    seed(27)
+
     # loop through all entries of the data
+
     for i in xrange(n):
 
         # generate random number between 0 and 1
