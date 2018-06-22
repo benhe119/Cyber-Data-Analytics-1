@@ -26,18 +26,13 @@ from matplotlib import pyplot as plt
 from reservoirSampling import applyAlgorithmR, applyReservoirSampling
 from CountMinSketch import CountMinSketch
 import operator
+import time
+import datetime as dt
+from discretize_data import discretizeBinary, discretizeSAX
 
 
-# Read data from CTU113 dataset
-
-# dataset 42
+# Read dataset 42 from CTU-13 dataset
 df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True, index_col='DateFlowStart')
-
-# Describe Data
-# print df_ctu13_42.describe()
-#print df_ctu13_42.head()
-# print df_ctu13_42.columns.values
-# print df_ctu13_42.columns
 
 # ==============================================================================
 #                       Import and Pre-process the data
@@ -46,50 +41,177 @@ df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", d
 # we see that the host's IP address starts with 147.32.***.***
 HostIP = '147.32.'
 
-# only consider rows where the source (SRC) is the host IP
-# df_ctu13_42 = df_ctu13_42[(df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP))]
-
 # Only consider rows where (1) Destination IP = hostIP AND (2) Source IP != hostIP
 df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) & (~df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP)))]
 
 # ==============================================================================
-#                           Min-wise hashing
+#                        1   Min-wise hashing
 # ==============================================================================
-# objective: estimate the distribution over the other ip addresses
 
-# split source IP:port into IP address and port separately
-df_ctu13_42[['SrcIPAddr','SrcPort']] = df_ctu13_42['SrcIPAddr_Port'].str.split(':', expand=True)
-
-# df_reservoir = applyAlgorithmR(df_ctu13_42["SrcIPAddr"],10)
-
-for resSize in [30]:#[5, 10, 15, 20, 30]:
-    print '-------------------------------------------\nAnalyzing Reservoir ...'
-    print ''
-    print 'reservoir size:' + str(resSize)
-    print ''
-    applyReservoirSampling(df_ctu13_42["SrcIPAddr"],resSize)
-
-
-
-# print df_reservoir.count
-# print df_reservoir.describe()
+# # split source IP:port into IP address and port separately
+# df_ctu13_42[['SrcIPAddr','SrcPort']] = df_ctu13_42['SrcIPAddr_Port'].str.split(':', expand=True)
+#
+# # df_reservoir = applyAlgorithmR(df_ctu13_42["SrcIPAddr"],10)
+#
+# for resSize in [30]:#[5, 10, 15, 20, 30]:
+#     print '-------------------------------------------\nAnalyzing Reservoir ...'
+#     print ''
+#     print 'reservoir size:' + str(resSize)
+#     print ''
+#     applyReservoirSampling(df_ctu13_42["SrcIPAddr"],resSize)
 
 # ==============================================================================
-#                         Apply Min-Count hashing
+#                       2  Apply Min-Count hashing
 # ==============================================================================
-w = 1000#number of column
-d = 10#number of row, hash count
-data = df_ctu13_42["SrcIPAddr"].as_matrix()
-cm = CountMinSketch(w, d)
-query = df_ctu13_42["SrcIPAddr"]
-ips = {}
-for item in data:
-    cm.add(str(item))
-for item in query:
-    frequency_est = cm.estimate(str(item))
-    ips[str(item)] = frequency_est
 
-print "Printing 30 most used IP's Min-Count hashing"
-ips_sorted = sorted(ips.items(), key=operator.itemgetter(1), reverse=True)
-for ip in ips_sorted[:30]:
-	print ip[0] + "  =>  " + str(ip[1])
+# w = 1000    #number of column
+# d = 10      #number of row, hash count
+# data = df_ctu13_42["SrcIPAddr"].as_matrix()
+# cm = CountMinSketch(w, d)
+# query = df_ctu13_42["SrcIPAddr"]
+# ips = {}
+# for item in data:
+#     cm.add(str(item))
+# for item in query:
+#     frequency_est = cm.estimate(str(item))
+#     ips[str(item)] = frequency_est
+#
+# print "Printing 30 most used IP's Min-Count hashing"
+# ips_sorted = sorted(ips.items(), key=operator.itemgetter(1), reverse=True)
+# for ip in ips_sorted[:30]:
+# 	print ip[0] + "  =>  " + str(ip[1])
+
+# ==============================================================================
+#                    3 Botnet flow data discretization
+# ==============================================================================
+
+# Read dataset 10 from CTU-13 dataset
+dtypes = ['str']
+
+columns = ['Year','Month','DayandTime', 'Dur','Proto','SrcAddr','Sport','Dir','DstAddr','Dport','State','sTos','dTos','TotPkts','TotBytes','Label']
+
+df_ctu13_10 = pd.read_csv("./data/2013-08-20_capture-win10.netflow.csv",delimiter=',',names=columns, parse_dates=False,header=0)#, dayfirst=True)#, index_col='StartTime')
+
+# print df_ctu13_10.columns.values
+# print df_ctu13_10.head(10)
+# remove background flows
+df_ctu13_10 = df_ctu13_10[~df_ctu13_10["Label"].str.contains("Background")]
+
+#df_ctu13_10['StartTime'] = df_ctu13_10['StartTime'].astype(int)
+
+print df_ctu13_10.columns.values
+
+print df_ctu13_10.dtypes
+
+# print df_ctu13_10.head(15)
+
+# print df_ctu13_10['StartTime'].dtype
+
+
+
+df_ctu13_10['Day'], df_ctu13_10['Time'] = df_ctu13_10['DayandTime'].str.split(' ',1).str
+df_ctu13_10['Hour'], df_ctu13_10['MinutesExt'] = df_ctu13_10['Time'].str.split(':',1).str
+df_ctu13_10['Minutes'], df_ctu13_10['Seconds'] = df_ctu13_10['MinutesExt'].str.split(':',1).str
+
+df_ctu13_10['daysInMonth'] = df_ctu13_10['Month']
+# df_ctu13_10['daysInMonth'] =
+
+df_ctu13_10['timeLong'] = (df_ctu13_10['Month'].astype(float)-1)*(24.0*3600) + df_ctu13_10['Seconds'].astype(float) + 60.0*(df_ctu13_10['Minutes'].astype(float)) + 3600.0*(df_ctu13_10['Hour'].astype(float)) + (24*3600.0)*(df_ctu13_10['Day'].astype(float))
+df_ctu13_10['deltaTfeature'] = df_ctu13_10['SrcAddr'] + ';' + df_ctu13_10['DstAddr'] + df_ctu13_10['timeLong'].astype(str)
+
+# print df_ctu13_10.head(15)
+
+# array = pd.to_numeric(df_ctu13_10['DayandTime'])
+# print array
+
+# df_ctu13_10['StartTime'] = df_ctu13_10['StartTime'].apply(int) #.astype(str).astype(int)
+# print "successs"
+
+# create list of IP address combinations
+ipComboList = [];
+
+# feature extraction
+# for index, row in df_ctu13_10.iterrows():
+
+    #ipSrcDst = row["SrcAddr"] + ":" + row["DstAddr"] + ";" + pd.to_numeric(index)
+    #print ipSrcDst
+
+    # 10.2.3.4:1.4.2.4
+
+# create temporary entry
+df_ctu13_10['lastAttackIP'] = df_ctu13_10['timeLong'].shift(-1) - df_ctu13_10['timeLong']
+
+
+
+# print df_ctu13_10.head(5)
+
+C1 = 1.0;
+C2 = 1.0;
+
+# print 'asdfasdfasdfasdf\n\n\n\n\n\n\n5'
+
+print df_ctu13_10['lastAttackIP'].describe()
+
+print df_ctu13_10['TotPkts'].describe()
+
+df_ctu13_10['lastAttackIP'].clip(-10,10)
+
+print df_ctu13_10['lastAttackIP'].describe()
+
+
+# create a cost value from these two features C1*(df_ctu13_10['TotPkts'].astype(float)-415)
+
+df_ctu13_10['costVal'] = C2*df_ctu13_10['lastAttackIP'].astype(float)
+
+df_ctu13_10['costVal'] = df_ctu13_10['costVal'].clip(-0.0,10.0)
+
+print df_ctu13_10['costVal'].describe()
+
+# discretize the extracted features
+
+# apply SAX
+xlist, ylist = discretizeSAX('costVal',df_ctu13_10)
+
+#### LOOK HERE!
+
+# print xlist
+
+
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###
