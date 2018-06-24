@@ -44,6 +44,8 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	grams = ngrams(discretizedTestData, window_size)
 
 
+	print states
+
 	itemCount = 0
 
 	previousGram = ""
@@ -68,8 +70,8 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 			elif key not in states:
 				#no botnet, because it's a unique connection costs
 				anomalyList.append(0)
-			elif states[key] > (1 - threshold):
-				print "Bot net connection: "+key+" higher then 1-threshold"
+			elif states[key] > threshold:
+				print "Bot net connection: "+key+" higher then threshold"
 				anomalyList.append(1)
 			else:
 				anomalyList.append(0)

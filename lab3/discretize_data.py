@@ -86,7 +86,7 @@ def discretizeSAX(fieldname, dataframe):
     y_time = np.asarray(y_time).reshape(-1)
 
     #set the wordSize to the exact same size as the dataframe, so they overlap
-    saxobject = sax.SAX(wordSize = len(dataframe), alphabetSize = 4, epsilon = 1e-6)
+    saxobject = sax.SAX(wordSize = len(dataframe), alphabetSize = 10, epsilon = 1e-6)
 
     letterseq = saxobject.to_letter_rep(np.transpose(y_time))
     # print letterseq[0]

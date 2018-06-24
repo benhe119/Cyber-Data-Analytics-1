@@ -11,6 +11,7 @@ import time
 from datetime import datetime as dt
 from discretize_data import discretizeBinary, discretizeSAX
 from N_gram import N_gram
+import math
 
 # ==============================================================================
 #                    3 Botnet flow data discretization
@@ -91,6 +92,12 @@ print '================ INFECTED HOSTS IPs ================'
 print infectedHosts
 print ''
 
+infectedHostData['costVal'] = 	infectedHostData['costVal'].fillna(0)
+allHostsExcludingInfectedHostData['costVal'] = allHostsExcludingInfectedHostData['costVal'].fillna(0)
+
+print infectedHostData['costVal'].sort_values(ascending=False)
+print allHostsExcludingInfectedHostData['costVal'].sort_values(ascending=False)
+
 
 #SAX both datasets
 print '================ SAX ================'
@@ -100,11 +107,12 @@ xTest, yTest = discretizeSAX('costVal',allHostsExcludingInfectedHostData)
 print 'discretization test set done!'
 print ''
 
+
 # Question 3 is done here. We can plot the xText and yText as a discretization example
 
 #N gram for all other hosts
 print '================ N-gram ================'
-listWithAssumedBotnetTraffic = N_gram(yTrain, yTest, 2, 0.01)
+listWithAssumedBotnetTraffic = N_gram(yTrain, yTest, 2, 0.1)
 print 'N-gram analysis completed, start count TP/FP'
 
 # # show difference in length of data
@@ -137,7 +145,7 @@ for flag in listWithAssumedBotnetTraffic:
 		tp = tp + 1
 	elif flag == 1 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false positive
-		print "FP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
+		#print "FP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
 		fp = fp + 1
 	elif flag == 0 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false negative
