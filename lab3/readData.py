@@ -27,22 +27,23 @@ from reservoirSampling import applyAlgorithmR, applyReservoirSampling
 from CountMinSketch import CountMinSketch
 import operator
 import time
-import datetime as dt
+# import datetime as dt
+from datetime import datetime as dt
 from discretize_data import discretizeBinary, discretizeSAX
 
 
 # Read dataset 42 from CTU-13 dataset
-df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True, index_col='DateFlowStart')
-
-# ==============================================================================
-#                       Import and Pre-process the data
-# ==============================================================================
-
-# we see that the host's IP address starts with 147.32.***.***
-HostIP = '147.32.'
-
-# Only consider rows where (1) Destination IP = hostIP AND (2) Source IP != hostIP
-df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) & (~df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP)))]
+# df_ctu13_42 = pd.read_csv("./data/capture20110815-2.pcap.netflow.labeled.csv", delimiter=',', parse_dates=True, dayfirst=True, index_col='DateFlowStart')
+#
+# # ==============================================================================
+# #                       Import and Pre-process the data
+# # ==============================================================================
+#
+# # we see that the host's IP address starts with 147.32.***.***
+# HostIP = '147.32.'
+#
+# # Only consider rows where (1) Destination IP = hostIP AND (2) Source IP != hostIP
+# df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) & (~df_ctu13_42["SrcIPAddr_Port"].str.contains(HostIP)))]
 
 # ==============================================================================
 #                        1   Min-wise hashing
@@ -85,17 +86,54 @@ df_ctu13_42 = df_ctu13_42[((df_ctu13_42["DstIPAddr_Port"].str.contains(HostIP)) 
 #                    3 Botnet flow data discretization
 # ==============================================================================
 
-# Read dataset 10 from CTU-13 dataset
-dtypes = ['str']
+columns = ['DateFlowStart','Duration','Protocol', 'SrcIPAddr_Port','Dir','DstIPAddr_Port','Flags','Tos','Packets','Bytes','Flows','Labels']
+dtypes = ['datetime','float','str','str','str','str','str','int','int','int','int','str']
+dtypes = {'DateFlowStart': 'str','Duration': 'float','Protocol': 'str', 'SrcIPAddr_Port': 'str','Dir': 'str','DstIPAddr_Port': 'str','Flags': 'str','Tos': 'str','Packets': 'str','Bytes': 'str','Flows': 'str', 'Lables': 'str'}
+parse_dates = ['DateFlowStart']
+# load data
+print ' reading csv...'
+df_ctu13_10 = pd.read_csv("./data/capture20110815_short.csv",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0)#, dayfirst=True)#, index_col='StartTime')
+print ' done!\n'
 
-columns = ['Year','Month','DayandTime', 'Dur','Proto','SrcAddr','Sport','Dir','DstAddr','Dport','State','sTos','dTos','TotPkts','TotBytes','Label']
+# split port and IP address
+print ' adding and dropping data fields...'
+# split IP address and port number
+df_ctu13_10['SrcIP'], df_ctu13_10['SrcPort'] = df_ctu13_10['SrcIPAddr_Port'].str.split(':',1).str
+df_ctu13_10['DstIP'], df_ctu13_10['DstPort'] = df_ctu13_10['DstIPAddr_Port'].str.split(':',1).str
+# remove flow column
+columnsToDrop = ['Flows','SrcPort','DstPort','SrcIPAddr_Port','DstIPAddr_Port']
+df_ctu13_10.drop(columns=columnsToDrop,inplace=True)
+print ' done!\n'
 
-df_ctu13_10 = pd.read_csv("./data/2013-08-20_capture-win10.netflow.csv",delimiter=',',names=columns, parse_dates=False,header=0)#, dayfirst=True)#, index_col='StartTime')
+print ' parsing dates...'
+df_ctu13_10['DateFlowStart'] = pd.to_datetime(df_ctu13_10['DateFlowStart']) - pd.to_datetime(df_ctu13_10['DateFlowStart'][0])
+# df_ctu13_10['DateFlowStart'] = df_ctu13_10['DateFlowStart'] - df_ctu13_10['DateFlowStart'][0]
+print ' done!\n'
 
-# print df_ctu13_10.columns.values
 # print df_ctu13_10.head(10)
-# remove background flows
-df_ctu13_10 = df_ctu13_10[~df_ctu13_10["Label"].str.contains("Background")]
+
+# print df_ctu13_10['DateFlowStart'].dtype
+
+# df_ctu13_10['DateFlowStartShift'] = df_ctu13_10['DateFlowStart'].shift(-1)
+# print df_ctu13_10['DateFlowStartShift'].dtype
+
+# print df_ctu13_10['DateFlowStart'][0]
+
+# df_ctu13_10['DateFlowStart'] = df_ctu13_10['DateFlowStart'].shift(-1) - df_ctu13_10['DateFlowStart']
+
+# print df_ctu13_10['DateFlowStart'].dtype
+
+# get time in seconds
+print ' converting datetime to seconds...'
+df_ctu13_10['timeLong'] = df_ctu13_10['DateFlowStart'].dt.total_seconds()
+print ' done!\n'
+
+print df_ctu13_10.describe()
+print df_ctu13_10.head(30)
+
+print '-------------------------------------'
+
+
 
 #df_ctu13_10['StartTime'] = df_ctu13_10['StartTime'].astype(int)
 
@@ -103,40 +141,7 @@ print df_ctu13_10.columns.values
 
 print df_ctu13_10.dtypes
 
-# print df_ctu13_10.head(15)
 
-# print df_ctu13_10['StartTime'].dtype
-
-
-
-df_ctu13_10['Day'], df_ctu13_10['Time'] = df_ctu13_10['DayandTime'].str.split(' ',1).str
-df_ctu13_10['Hour'], df_ctu13_10['MinutesExt'] = df_ctu13_10['Time'].str.split(':',1).str
-df_ctu13_10['Minutes'], df_ctu13_10['Seconds'] = df_ctu13_10['MinutesExt'].str.split(':',1).str
-
-df_ctu13_10['daysInMonth'] = df_ctu13_10['Month']
-# df_ctu13_10['daysInMonth'] =
-
-df_ctu13_10['timeLong'] = (df_ctu13_10['Month'].astype(float)-1)*(24.0*3600) + df_ctu13_10['Seconds'].astype(float) + 60.0*(df_ctu13_10['Minutes'].astype(float)) + 3600.0*(df_ctu13_10['Hour'].astype(float)) + (24*3600.0)*(df_ctu13_10['Day'].astype(float))
-df_ctu13_10['deltaTfeature'] = df_ctu13_10['SrcAddr'] + ';' + df_ctu13_10['DstAddr'] + df_ctu13_10['timeLong'].astype(str)
-
-# print df_ctu13_10.head(15)
-
-# array = pd.to_numeric(df_ctu13_10['DayandTime'])
-# print array
-
-# df_ctu13_10['StartTime'] = df_ctu13_10['StartTime'].apply(int) #.astype(str).astype(int)
-# print "successs"
-
-# create list of IP address combinations
-ipComboList = [];
-
-# feature extraction
-# for index, row in df_ctu13_10.iterrows():
-
-    #ipSrcDst = row["SrcAddr"] + ":" + row["DstAddr"] + ";" + pd.to_numeric(index)
-    #print ipSrcDst
-
-    # 10.2.3.4:1.4.2.4
 
 # create temporary entry
 df_ctu13_10['lastAttackIP'] = df_ctu13_10['timeLong'].shift(-1) - df_ctu13_10['timeLong']
@@ -181,6 +186,43 @@ xlist, ylist = discretizeSAX('costVal',df_ctu13_10)
 #
 
 
+
+
+#
+# # print df_ctu13_10.head(15)
+#
+# # print df_ctu13_10['StartTime'].dtype
+#
+#
+#
+# df_ctu13_10['Day'], df_ctu13_10['Time'] = df_ctu13_10['DayandTime'].str.split(' ',1).str
+# df_ctu13_10['Hour'], df_ctu13_10['MinutesExt'] = df_ctu13_10['Time'].str.split(':',1).str
+# df_ctu13_10['Minutes'], df_ctu13_10['Seconds'] = df_ctu13_10['MinutesExt'].str.split(':',1).str
+#
+# df_ctu13_10['daysInMonth'] = df_ctu13_10['Month']
+# # df_ctu13_10['daysInMonth'] =
+#
+# df_ctu13_10['timeLong'] = (df_ctu13_10['Month'].astype(float)-1)*(24.0*3600) + df_ctu13_10['Seconds'].astype(float) + 60.0*(df_ctu13_10['Minutes'].astype(float)) + 3600.0*(df_ctu13_10['Hour'].astype(float)) + (24*3600.0)*(df_ctu13_10['Day'].astype(float))
+# df_ctu13_10['deltaTfeature'] = df_ctu13_10['SrcAddr'] + ';' + df_ctu13_10['DstAddr'] + df_ctu13_10['timeLong'].astype(str)
+#
+# # print df_ctu13_10.head(15)
+#
+# # array = pd.to_numeric(df_ctu13_10['DayandTime'])
+# # print array
+#
+# # df_ctu13_10['StartTime'] = df_ctu13_10['StartTime'].apply(int) #.astype(str).astype(int)
+# # print "successs"
+#
+# # create list of IP address combinations
+# ipComboList = [];
+#
+# # feature extraction
+# # for index, row in df_ctu13_10.iterrows():
+#
+#     #ipSrcDst = row["SrcAddr"] + ":" + row["DstAddr"] + ";" + pd.to_numeric(index)
+#     #print ipSrcDst
+#
+#     # 10.2.3.4:1.4.2.4
 
 
 
