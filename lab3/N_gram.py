@@ -43,6 +43,9 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 	# now check the test data
 	grams = ngrams(discretizedTestData, window_size)
 
+
+	itemCount = 0
+
 	previousGram = ""
 
 	anomalyList = []
@@ -51,6 +54,8 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
    		while True:
    			#get the next gram
 			gram = grams.next()
+
+			itemCount = itemCount + 1
 
 			#create key string
 			currentGram = ''.join(gram)
@@ -73,6 +78,8 @@ def N_gram(discretizeTrainData, discretizedTestData, window_size, threshold):
 			previousGram = currentGram
 	except StopIteration:
 		pass
+
+	#print len(itemCount)
 
 	# anomalyList.append(0)
 	# anomalyList.append(0)

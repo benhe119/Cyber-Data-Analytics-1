@@ -117,8 +117,9 @@ print 'N-gram analysis completed, start count TP/FP'
 while (len(listWithAssumedBotnetTraffic) != len(yTest)):
 	yTest = yTest[:-1] # remove last entry
 
-print "Length listWithAssumedBotnetTraffic:" + len(listWithAssumedBotnetTraffic)
-print "Length allHostsExcludingInfectedHostData:" + len(allHostsExcludingInfectedHostData)
+# print "Length yTest:" + str(len(yTest))
+# print "Length listWithAssumedBotnetTraffic:" + str(len(listWithAssumedBotnetTraffic))
+# print "Length allHostsExcludingInfectedHostData:" + str(len(allHostsExcludingInfectedHostData))
 
 count 	= 0
 tp 		= 0
@@ -126,23 +127,24 @@ fp 		= 0
 fn 		= 0
 tn 		= 0
 
+
+
 for flag in listWithAssumedBotnetTraffic:
 	#check for true positives
-	if flag == 1 and "Botnet" in yTest[count]['Labels']:
+	if flag == 1 and "Botnet" in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a true positive
 		print "TP => " + yTest[count]['DateFlowStart'] + " from " + yTest[count]['SrcIP'] + " to " + yTest[count]['DstIP'] 
 		tp = tp + 1
-	elif flag == 1 and "Botnet" not in ytest[count]['Labels']:
+	elif flag == 1 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false positive
 		print "FP => " + yTest[count]['DateFlowStart'] + " from " + yTest[count]['SrcIP'] + " to " + yTest[count]['DstIP'] 
 		fp = fp + 1
-	elif flag == 0 and "Botnet" in yTest[count]['Labels']:
+	elif flag == 0 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false negative
 		#print "FN => " + ytest[count]['DateFlowStart'] + " from " + ytest[count]['SrcIP'] + " to " + ytest[count]['DstIP'] 
 		fn = fn + 1
 	else:
 		tn = tn + 1
-
 
 	count = count + 1
 
@@ -154,4 +156,3 @@ print 'FP count:' + str(fp)
 print 'FN count:' + str(fn)
 print 'TN count:' + str(tn)
 
-#xlist, ylist = discretizeSAX('costVal',chunk)
