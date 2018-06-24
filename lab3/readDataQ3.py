@@ -133,11 +133,11 @@ for flag in listWithAssumedBotnetTraffic:
 	#check for true positives
 	if flag == 1 and "Botnet" in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a true positive
-		print "TP => " + allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart'] + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
+		print "TP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
 		tp = tp + 1
 	elif flag == 1 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false positive
-		print "FP => " + allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart'] + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
+		print "FP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
 		fp = fp + 1
 	elif flag == 0 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false negative
