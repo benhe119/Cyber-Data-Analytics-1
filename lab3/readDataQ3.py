@@ -25,7 +25,7 @@ print ' reading csv...'
 
 #reading the dataset in chuncks
 chunksize = 20000
-reader = pd.read_csv("./data/run_test.csv",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0, chunksize=chunksize)
+reader = pd.read_csv("./data/capture20110818.pcap.netflow.labeled.csv",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0, chunksize=chunksize)
 count = 1
 
 #set coeficients
@@ -81,7 +81,7 @@ for chunk in reader:
 	infectedHostData 					= pd.concat([infectedHostData,infectedSet])
 	allHostsExcludingInfectedHostData 	= pd.concat([allHostsExcludingInfectedHostData,restSet])
 		
-	print ' chunk read ' + str(((count * chunksize)/5180000)*100) +"%"
+	print ' chunk read ' + str(((count * chunksize)/51800)) +"%" + " (" + str(count * chunksize) + ")"
 	count = count + 1
 
 #log to console
