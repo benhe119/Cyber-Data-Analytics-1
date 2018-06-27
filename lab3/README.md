@@ -12,18 +12,14 @@ Group 60 - Ernst Mulders and Alex Berndt
 
 ##### Terminal Commands #####
 
-- git clone https://github.com/alexberndt/CyberDataAnalytics/ Group60Lab2
-- cd Group60Lab2/lab2/
+- git clone https://github.com/alexberndt/CyberDataAnalytics/ Group60Lab3
+- cd Group60Lab3/lab3/
 - pip install -r requirements.txt
 - python2 processTrainingDataset.py
 
-The **main** file is ***processTrainingDataset.py***
-
 ### Analysis Methods ###
 
-Anomaly detection is done by using different methods:
-- **ARMA** time series predicition
-- **N-gram** using SAX discretization and Markov chains
-- Principle Components Analysis (**PCA**)
+The **main** file for Task 1 and 2 is ***readData.py***
+this file runs the reservoir sampling as well as the min count sketch
 
-In ***processTrainingDataset.py***, change *analysisMethod* (line 82) to try the different methods
+For Task 3 and 4, run ***readDataQ3.py***
