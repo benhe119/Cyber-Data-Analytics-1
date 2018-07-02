@@ -63,7 +63,7 @@ def  applyReservoirSampling(df_column, reservoirSize):
     # fill reservoir with first k elements of df_column
     df_reservoir = df_column.head(k)
 
-    print df_reservoir
+    #print df_reservoir
 
     onesmat = np.ones((k,1)).flatten(order='F')
     df_ones = pd.DataFrame(onesmat,columns=['Key'])
@@ -103,7 +103,7 @@ def  applyReservoirSampling(df_column, reservoirSize):
     for i in xrange(n):
 
         # generate random number between 0 and 1
-        r = uniform(0,1)
+        r = (uniform(0,1)/(i+1))
 
         if r < df_PQ['Key'].max():
             rIdx = df_PQ['Key'].idxmax()
@@ -117,7 +117,7 @@ def  applyReservoirSampling(df_column, reservoirSize):
         # if j < k:
         #     df_reservoir.iloc[j] = df_column.iloc[j]
 
-    print df_PQ
-    print '\n'
+    #print df_PQ
+    #print '\n'
 
-    return# df_PQ
+    return df_PQ# df_PQ

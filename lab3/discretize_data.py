@@ -98,7 +98,7 @@ def discretizeSAX(fieldname, dataframe):
     #print xlist
 
     #uncomment to show plot
-    #saxobject.plot_results(x_axis_list=xlist,y_axis_list=ylist)
+    saxobject.plot_results(x_axis_list=xlist,y_axis_list=ylist)
 
     return xlist, ylist # void
 

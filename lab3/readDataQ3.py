@@ -26,7 +26,8 @@ print ' reading csv...'
 
 #reading the dataset in chuncks
 chunksize = 20000
-reader = pd.read_csv("./data/capture20110818.pcap.netflow.labeled.csv",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0, chunksize=chunksize)
+# reader = pd.read_csv("./data/capture20110818.pcap.netflow.labeled.csv",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0, chunksize=chunksize)
+reader = pd.read_csv("./data/test.netflow",delimiter=',',names=columns,dtype=dtypes,parse_dates=parse_dates,header=0, chunksize=chunksize)
 count = 1
 
 #set coeficients
@@ -45,7 +46,7 @@ d = pd.to_datetime({'year':[2011], 'month':[8], 'day':[18], 'hour':[10], 'minute
 
 #loop through all chuncks
 for chunk in reader:
-	
+
 	# split IP address and port number
 	chunk['SrcIP'], chunk['SrcPort'] = chunk['SrcIPAddr_Port'].str.split(':',1).str
 	chunk['DstIP'], chunk['DstPort'] = chunk['DstIPAddr_Port'].str.split(':',1).str
@@ -53,7 +54,7 @@ for chunk in reader:
 	#parsing dates
 	#print chunk['DateFlowStart']
 	chunk['DateFlowStart'] = pd.to_datetime(chunk['DateFlowStart']) - d[0]
-	
+
 	# get time in seconds
 	chunk['timeLong'] = chunk['DateFlowStart'].dt.total_seconds()
 
@@ -67,7 +68,7 @@ for chunk in reader:
 
 	#decided in what variable we want to store the entries (training hosts, or other hosts)
 	for index, row in chunk.iterrows():
-		#check for IP's with botnet we hadn't stored yet		
+		#check for IP's with botnet we hadn't stored yet
 		if row['SrcIP'] not in infectedHosts and "Botnet" in row['Labels']:
 			infectedHosts.append(row['SrcIP'])
 
@@ -81,7 +82,7 @@ for chunk in reader:
 	#if infectedHostData is not None:
 	infectedHostData 					= pd.concat([infectedHostData,infectedSet])
 	allHostsExcludingInfectedHostData 	= pd.concat([allHostsExcludingInfectedHostData,restSet])
-		
+
 	print ' chunk read ' + str(((count * chunksize)/51800)) +"%" + " (" + str(count * chunksize) + ")"
 	count = count + 1
 
@@ -141,15 +142,15 @@ for flag in listWithAssumedBotnetTraffic:
 	#check for true positives
 	if flag == 1 and "Botnet" in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a true positive
-		print "TP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
+		print "TP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP']
 		tp = tp + 1
 	elif flag == 1 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false positive
-		#print "FP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP'] 
+		#print "FP => " + str(allHostsExcludingInfectedHostData.iloc[count]['DateFlowStart']) + " from " + allHostsExcludingInfectedHostData.iloc[count]['SrcIP'] + " to " + allHostsExcludingInfectedHostData.iloc[count]['DstIP']
 		fp = fp + 1
 	elif flag == 0 and "Botnet" not in allHostsExcludingInfectedHostData.iloc[count]['Labels']:
 		#we found a false negative
-		#print "FN => " + ytest[count]['DateFlowStart'] + " from " + ytest[count]['SrcIP'] + " to " + ytest[count]['DstIP'] 
+		#print "FN => " + ytest[count]['DateFlowStart'] + " from " + ytest[count]['SrcIP'] + " to " + ytest[count]['DstIP']
 		fn = fn + 1
 	else:
 		tn = tn + 1
@@ -163,4 +164,3 @@ print 'TP count:' + str(tp)
 print 'FP count:' + str(fp)
 print 'FN count:' + str(fn)
 print 'TN count:' + str(tn)
-

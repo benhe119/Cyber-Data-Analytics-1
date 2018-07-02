@@ -9,7 +9,7 @@ with open(source_file, 'r') as pcap:
  	data=data.replace('\t\t\t',',').replace('\t\t',',').replace('\t',',')
     #data=pcap.read().replace('')
 
-   #2011-08-18 12:18:37.527 0.000 ICMP 147.32.84.193 -> 147.32.96.69 ___ 0 1 1066 1 Botnet 
+   #2011-08-18 12:18:37.527 0.000 ICMP 147.32.84.193 -> 147.32.96.69 ___ 0 1 1066 1 Botnet
 
 
 filename = source_file + ".csv"
