@@ -18,12 +18,11 @@ Group 60 - Ernst Mulders and Alex Berndt
 
 ##### Task 1 and 2 #####
 
-run parse_data.py (this creates a csv file of the dataset in the data/ directory)
-- python2 parse_data.py
-
 The **main** file for Task 1 and 2 is ***readData.py***
 this file runs the reservoir sampling as well as the min count sketch
 - python2 readData.py
+
+*The parsed csv file is already in the repository (this was done using parse_data.py, but you do not need to run it since it is already done!)*
 
 ##### Task 3 and 4 #####
 
