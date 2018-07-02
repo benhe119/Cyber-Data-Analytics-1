@@ -26,7 +26,11 @@ this file runs the reservoir sampling as well as the min count sketch
 
 ##### Task 3 and 4 #####
 
-
-
 For Task 3 and 4, run ***readDataQ3.py***
 - python2 readDataQ3.py
+
+Currently, the code runs the test.netflows file which is a sampled, parsed version of the large 500+ MB file of netflow traffic. This is just to improve the speed of the code.
+
+You can download the full 500Mb file from here: https://www.dropbox.com/s/kpap4zoy77tv1x0/capture20110818.pcap.netflow.labeled.csv?dl=0
+
+To process this file, just uncomment line 29 **reader = csv_read(...)** and comment line 30.
